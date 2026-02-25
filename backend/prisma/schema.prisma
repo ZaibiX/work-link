@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ... (Keep your existing generator and datasource blocks)
+
+// 1. Worker Availability Status
+enum WorkerStatus {
+  AVAILABLE
+  BUSY
+  NOT_AVAILABLE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // "CLIENT" or "WORKER"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //Soft Delete Flag
+  isDeleted Boolean  @default(false)
+  
+  workerProfile WorkerProfile?
+}
+
+model WorkerProfile {
+  id              String   @id @default(uuid())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String   @unique
+  phone           String
+  skillCategory   String
+  country         String   
+  city            String
+  experienceYears Int
+  cnic            String   @unique
+
+  status          WorkerStatus @default(AVAILABLE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // A worker can have multiple Gigs (Posts)
+  gigs            Gig[]
+}
+
+model Gig {
+  id          String   @id @default(uuid())
+  title       String   // e.g., "Professional AC Deep Cleaning"
+  description String   // Detailed explanation of the service
+  price       Float    // Starting price in PKR
+  category    String   // Inherited or specific, e.g., "AC Technician"
+ // deliveryTime Int     // Estimate in hours or days
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  
+  city        String
+  address     String
+  lat         Float?
+  lng         Float?
+
+  //Toggle visibility to the public
+  isActive    Boolean  @default(true)
+
+  //Soft Delete Flag
+  isDeleted Boolean  @default(false)
+
+  // Relationship back to the worker
+  worker      WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId    String
+}
