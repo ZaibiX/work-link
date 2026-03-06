@@ -3,7 +3,7 @@
 import React from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { useThemeStore } from "@/store/themeStore";
+// import { useThemeStore } from "@/store/themeStore";
 import { getTheme } from "@/theme/theme";
 
 interface AppThemeProviderProps extends React.PropsWithChildren {}
@@ -14,7 +14,7 @@ export default function AppThemeProvider({ children }: AppThemeProviderProps) {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       {children}
     </ThemeProvider>
   );

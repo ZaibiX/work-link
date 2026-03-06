@@ -5,6 +5,11 @@ import AppThemeProvider from "./providers/ThemeProvider";
 import Navbar from "@/components/navbar/Navbar";
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
+import { ThemeProvider } from "@mui/material/styles";
+import { getTheme } from "@/theme/theme";
+import CssBaseline from "@mui/material/CssBaseline";
+
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,12 +41,14 @@ export default function RootLayout({
         {/* It prevents dark/light mode flicker during page load. */}
 
 
-        <AppRouterCacheProvider>
+        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           {/* mui needs to be wrapped in AppRouterCacheProvider for the color scheme to work so that it can match colors on the server and client */}
-          <AppThemeProvider>
+          <ThemeProvider theme={getTheme}>
+            <CssBaseline enableColorScheme />
+
             <Navbar />
             {children}
-          </AppThemeProvider>
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

@@ -1,4 +1,4 @@
-
+'use client';
 import { createTheme } from "@mui/material/styles";
 
 export const getTheme = createTheme({
@@ -30,7 +30,12 @@ export const getTheme = createTheme({
 
         background: {
           default: "#FDFDFF",
+          // default: "#1eb45d",
+
+          // default: "#8686eb",
+
           paper: "#FFFFFF",
+          // paper:"#FF67FF"
         },
 
         text: {
@@ -94,17 +99,17 @@ export const getTheme = createTheme({
     },
   },
 
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: ({ theme }) => ({
-          backgroundImage: "none",
-          boxShadow:
-            theme.palette.mode === "light"
-              ? "0px 4px 20px rgba(0,0,0,0.04)"
-              : "0px 4px 25px rgba(0,0,0,0.2)",
-        }),
-      },
-    },
-  },
+  // components: {
+  //   MuiPaper: {
+  //     styleOverrides: {
+  //       root: ({ theme }) => ({
+  //         backgroundImage: "none",
+  //         boxShadow:
+  //           theme.palette.mode === "light"
+  //             ? "0px 4px 20px rgba(0,0,0,0.04)"
+  //             : "0px 4px 25px rgba(0,0,0,0.2)",
+  //       }),
+  //     },
+  //   },
+  // },
 });

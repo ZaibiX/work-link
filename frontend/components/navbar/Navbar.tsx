@@ -32,6 +32,7 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import useMediaQuery from "@mui/material/useMediaQuery";
 
+
 interface Props {
   /**
    * Injected by the documentation to work in an iframe.
@@ -76,16 +77,21 @@ export default function HideAppBar(props: Props) {
   const toggleColorMode = () => {
     setMode(mode === "light" ? "dark" : "light");
   };
-  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
-  console.log("System prefers dark mode:", prefersDarkMode);
+  // const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  // console.log("System prefers dark mode:", prefersDarkMode);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState)
   }
-  if (!mode) return;
-  console.log("Current theme mode:", mode);
+
+  const scrollTrigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 15, // trigger after small scroll
+  })
+  // if (!mode) return;
+  // console.log("Current theme mode:", mode);
   const drawer = (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", width: "100%", alignItems: "center", mx: "auto", }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", width: "100%", alignItems: "center", mx: "auto", bgcolor:"background.default"}}>
       
       <DrawerHeader sx={{ width: "100%", }}>
 
@@ -181,7 +187,12 @@ export default function HideAppBar(props: Props) {
     <React.Fragment>
       <CssBaseline />
       <HideOnScroll {...props}>
-        <AppBar component="nav" color="default" sx={{}} elevation={0}>
+        <AppBar component="nav" sx={{
+          bgcolor:"background.default",
+          borderBottom:  scrollTrigger ? "1px solid" : "none",
+        borderColor: "divider",
+        transition: "border 0.2s ease",
+          }} elevation={0} enableColorOnDark>
           <Toolbar >
 
 
@@ -291,7 +302,7 @@ export default function HideAppBar(props: Props) {
         </Drawer>
       </nav>
 
-      <Container>
+      {/* <Container>
         <Box sx={{ my: 2 }}>
           {[...new Array(12)]
             .map(
@@ -302,7 +313,7 @@ Praesent commodo cursus magna, vel scelerisque nisl consectetur et.`,
             )
             .join('\n')}
         </Box>
-      </Container>
+      </Container> */}
     </React.Fragment>
   )
 }
