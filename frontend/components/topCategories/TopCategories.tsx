@@ -20,6 +20,7 @@ import BrushIcon from '@mui/icons-material/Brush';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import YardIcon from '@mui/icons-material/Yard';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Link from 'next/link';
 
 const categories = [
@@ -133,7 +134,7 @@ export default function TopCategories() {
             </Paper>
           </Grid> */}
           <Grid size={{ xs: 4, sm: 6, md: 6 }} sx={{m:"auto"}}  >
-            <Button component={Link} href="/categories" variant="outlined" fullWidth size="small" >
+            <Button component={Link} href="/categories" variant="outlined" fullWidth size="small" sx={{textAlign:"center"}} endIcon={<ExpandMoreIcon />} >
                 View All Categories
             </Button>
           </Grid>
