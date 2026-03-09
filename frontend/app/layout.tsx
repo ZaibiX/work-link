@@ -8,6 +8,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 import { ThemeProvider } from "@mui/material/styles";
 import { getTheme } from "@/theme/theme";
 import CssBaseline from "@mui/material/CssBaseline";
+import Footer from "@/components/footer/Footer";
 
 
 
@@ -48,6 +49,7 @@ export default function RootLayout({
 
             <Navbar />
             {children}
+            <Footer/>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

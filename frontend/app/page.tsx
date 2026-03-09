@@ -1,6 +1,7 @@
 import Image from "next/image";
 import HeroSection from "@/components/heroSection/HeroSection";
 import TopCategories from "@/components/topCategories/TopCategories";
+import LatestWork from "@/components/latestWork/LatestWork";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <main className="w-full ">
        <HeroSection />
         <TopCategories />
+        <LatestWork />
       </main>
     </div>
   );
