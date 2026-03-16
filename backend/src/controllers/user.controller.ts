@@ -2,192 +2,206 @@ import type { Request, Response } from "express";
 import { prisma } from "../utils/prisma.js";
 import {SkillCategory } from "../../generated/prisma/enums.js";
 
-async function getHomeData(req: Request, res: Response) {
 
-    const CITY: string = req.query.city ? (req.query.city as string) : "Lahore";
-    const PAGE: number = req.query.page ? parseInt(req.query.page as string) : 1;
-    const LIMIT: number = 10;
-    const SKIP: number = (PAGE - 1) * LIMIT;
+
+// async function getHomeData(req: Request, res: Response) {
+
+//     const CITY: string = req.query.city ? (req.query.city as string) : "Lahore";
+//     const PAGE: number = req.query.page ? parseInt(req.query.page as string) : 1;
+//     const LIMIT: number = 10;
+//     const SKIP: number = (PAGE - 1) * LIMIT;
     
-    try{
-          const totalGigs = await prisma.gig.count({
-        where: {
-            city: CITY,
-            isActive: true,
-            isDeleted: false
-        }
-    });
+//     try{
+//           const totalGigs = await prisma.gig.count({
+//         where: {
+//             city: CITY,
+//             isActive: true,
+//             isDeleted: false
+//         }
+//     });
 
      
 
-    const recentGigs = await prisma.gig.findMany({
-        take: LIMIT,
-        skip: SKIP,
-        orderBy: {
-            createdAt: "desc",
-        },
-        where: {
-            isActive: true,
-            isDeleted: false
-        },
+//     const recentGigs = await prisma.gig.findMany({
+//         take: LIMIT,
+//         skip: SKIP,
+//         orderBy: {
+//             createdAt: "desc",
+//         },
+//         where: {
+//             isActive: true,
+//             isDeleted: false,
+//             city: CITY
+//         },
 
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            price: true,
-            category: true,
-            address: true,
-            city: true,
-            worker: {
-                select: {
-                    user: {
-                        select: {
+//         select: {
+//             id: true,
+//             title: true,
+//             description: true,
+//             price: true,
+//             category: true,
+//             address: true,
+//             city: true,
+//             worker: {
+//                 select: {
+//                     user: {
+//                         select: {
 
-                            name: true,
+//                             name: true,
 
-                        }
-                    }
-                }
-            }
-        }
-    });
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     });
     
-  res.status(200).json({ status: "success", data: {recentGigs, totalGigs } });
-  return;
-    }
-    catch(err){
+//   res.status(200).json({ status: "success", data: {recentGigs, totalGigs } });
+//   return;
+//     }
+//     catch(err){
 
-        res.status(500).json({ status: "error", message: "An error occurred while fetching home data." });
-        return;
-    }
+//         res.status(500).json({ status: "error", message: "An error occurred while fetching home data." });
+//         return;
+//     }
   
 
-}
+// }
 
  const searchGigs = async (req: Request, res: Response) => {
+  //req.params: category, city, sortBy, searchText, page
+  console.log("from backend req.query: ",req.query);
   try {
-    const allowedFilters = ["recent", "old", "priceLowToHigh", "priceHighToLow"];
+    const allowedSortBy = ["recent", "old", "priceLowToHigh", "priceHighToLow"];
 
-    // const { query, category, city } = req.query;
-    const queryStr = String(req.query.query || "");
-    const categoryStr = req.query.category?.toString() || "";
-    const cityStr = String(req.query.city || "");
-    const page: number = req.query.page ? parseInt(req.query.page as string) : 1;
-    const limit: number = 20;
-    const skip: number = (page - 1) * limit;
-    const filter : string = req.query.filter ? String(req.query.filter) : "recent";
-    if (!allowedFilters.includes(filter)) {
-  return res.status(400).json({ error: "Invalid filter value." });
-}
-let orderByCondition: any = { createdAt: "desc" }; // default recent
-    if (filter === "old") {
-  orderByCondition = { createdAt: "asc" };
-} else if (filter === "priceLowToHigh") {
-  orderByCondition = { price: "asc" };
-} else if (filter === "priceHighToLow") {
-  orderByCondition = { price: "desc" };
-}
+    // 1. Requirement Validation
+    const categoryInput = req.query.category ? String(req.query.category) : "";
+    const cityInput = req.query.city ? String(req.query.city) : "";
+    const sortByInput = req.query.sortBy ? String(req.query.sortBy) : "";
 
-    const isValidCategory = (Object.values(SkillCategory) as string[]).includes(categoryStr);
-    if (categoryStr && !isValidCategory) {
-      res.status(400).json({ error: "Invalid category value." });
-      return;
+    if (!categoryInput || !cityInput || !sortByInput) {
+      return res.status(400).json({ error: "Category, City, and SortBy are required." });
     }
 
-    if(!queryStr && !categoryStr && !cityStr){
-        res.status(400).json({ error: "At least one search parameter (query, category, or city) is required." });
-        return;
+    // 2. Sort Validation
+    if (!allowedSortBy.includes(sortByInput)) {
+      return res.status(400).json({ error: "Invalid sortBy value." });
     }
 
-    const gigs = await prisma.gig.findMany({
+    // 3. Category Validation & Mapping
+    let skillCategory: SkillCategory | undefined;
+
+    if (categoryInput === "ALL") {
+      // Valid state: Prisma will ignore the category filter
+      skillCategory = undefined;
+    } else if ((Object.values(SkillCategory) as string[]).includes(categoryInput)) {
+      // Valid state: Specific Enum value
+      skillCategory = categoryInput as SkillCategory;
+    } else {
+      // Invalid state: User sent "absctdf" or something else
+      return res.status(400).json({ error: "Invalid category value." });
+    }
+
+    // 4. Other Inputs
+    const searchText = req.query.searchText ? String(req.query.searchText) : "";
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+
+    // 5. Define Sorting Order
+    let orderByCondition: any = { createdAt: "desc" };
+    if (sortByInput === "old") orderByCondition = { createdAt: "asc" };
+    else if (sortByInput === "priceLowToHigh") orderByCondition = { price: "asc" };
+    else if (sortByInput === "priceHighToLow") orderByCondition = { price: "desc" };
+
+    // 6. Unified Where Clause
+    const whereCondition: any = {
+      isDeleted: false,
+      isActive: true,
+      city: cityInput,
+      category: skillCategory, 
+      ...(searchText && {
+        OR: [
+          { title: { contains: searchText, mode: 'insensitive' } },
+          { description: { contains: searchText, mode: 'insensitive' } },
+          { area: { contains: searchText, mode: 'insensitive' } },
+        ],
+      }),
+    };
+
+    // 7. Concurrent Database Calls
+    const [totalGigs, gigs] = await Promise.all([
+      prisma.gig.count({ where: whereCondition }),
+      prisma.gig.findMany({
+        where: whereCondition,
         take: limit,
         skip: skip,
         orderBy: orderByCondition,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          price: true,
+          category: true,
+          area: true,
+          city: true,
+          worker: {
+            select: {
+              user: { select: { name: true } }
+            }
+          }
+        }
+      })
+    ]);
 
-      where: {
-        isDeleted: false,
-        isActive: true,
-        // AND logic: all conditions must be met
-        AND: [
-          // 1. Filter by Category (Button)
-          categoryStr ? { category: categoryStr } : {},
-          
-          // 2. Filter by City
-          cityStr ? { city: cityStr } : {city: "Lahore"}, // Default to Lahore if city is not provided
-
-          // 3. Search Bar Logic (Text Search)
-          queryStr ? {
-            OR: [
-              { title: { contains: queryStr, mode: 'insensitive' } },
-              { description: { contains: queryStr, mode: 'insensitive' } },
-            ]
-          } : {},
-        ]
-      },
-      select: {
-            id: true,
-            title: true,
-            description: true,
-            price: true,
-            category: true,
-            address: true,
-            city: true,
-        worker: { select: {
-            
-            
-            user: { select: { name: true } }
-         } }
-      }
-    });
-
-    res.json({ data: gigs });
+    res.json({gigs, totalGigs });
   } catch (error) {
+    console.error("Search Error:", error);
     res.status(500).json({ error: "Search failed" });
   }
 };
 
-async function getRecentGigs(req: Request, res: Response) {
-    // Implement your logic to fetch recent gigs here, e.g., query the database for the latest gigs
-    const PAGE: number = req.query.page ? parseInt(req.query.page as string) : 1;
-    const LIMIT: number = 10;
-    const SKIP: number = (PAGE - 1) * LIMIT;
-    const recentGigs = await prisma.gig.findMany({
-        take: LIMIT,
-        skip: SKIP,
-        orderBy: {
-            createdAt: "desc",
-        },
-        where: {
-            isActive: true,
-            isDeleted: false
-        },
+// async function getRecentGigs(req: Request, res: Response) {
+//     // Implement your logic to fetch recent gigs here, e.g., query the database for the latest gigs
+//     const PAGE: number = req.query.page ? parseInt(req.query.page as string) : 1;
+//     const LIMIT: number = 10;
+//     const SKIP: number = (PAGE - 1) * LIMIT;
+//     const recentGigs = await prisma.gig.findMany({
+//         take: LIMIT,
+//         skip: SKIP,
+//         orderBy: {
+//             createdAt: "desc",
+//         },
+//         where: {
+//             isActive: true,
+//             isDeleted: false
+//         },
 
-        select: {
-            id: true,
-            title: true,
-            description: true,
-            price: true,
-            category: true,
-            address: true,
-            city: true,
-            worker: {
-                select: {
-                    user: {
-                        select: {
+//         select: {
+//             id: true,
+//             title: true,
+//             description: true,
+//             price: true,
+//             category: true,
+//             address: true,
+//             city: true,
+//             worker: {
+//                 select: {
+//                     user: {
+//                         select: {
 
-                            name: true,
+//                             name: true,
 
-                        }
-                    }
-                }
-            }
-        }
-    });
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     });
 
-    res.status(200).json({ status: "success", data: recentGigs });
-}
-export { getHomeData, searchGigs, getRecentGigs };
+//     res.status(200).json({ status: "success", data: recentGigs });
+// }
+export { searchGigs };
 
 
 

@@ -23,6 +23,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CurrencyPkgIcon from '@mui/icons-material/Payments'; // Represents Rupees/Cash
 import { useRouter, useSearchParams } from 'next/navigation';
+import GigList from "@/components/gigs/Gigs";
 
 // Mock Data
 const MOCK_GIGS = Array.from({ length: 20 }).map((_, i) => ({

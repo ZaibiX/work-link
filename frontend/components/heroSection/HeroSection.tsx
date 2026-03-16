@@ -111,6 +111,7 @@ const HeroSection = () => {
               <TextField
                 placeholder="Lahore, PK"
                 variant="standard"
+                defaultValue="Lahore"
                 sx={{
                   // bgcolor:"green",
                   // mr:6,

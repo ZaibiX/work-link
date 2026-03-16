@@ -20,57 +20,75 @@ import {
 } from "@mui/material";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { useRouter, useSearchParams } from 'next/navigation';
+// import { useRouter, useSearchParams } from 'next/navigation';
 
 // Mock Data following your Prisma Schema structure (40 items for testing)
-const GIGS_DATA = Array.from({ length: 40 }).map((_, i) => ({
-  id: `${i + 1}`,
-  title: [
-    "Expert Solar Panel Installation & Cleaning",
-    "Professional AC Gas Refilling",
-    "Modern Kitchen Woodwork",
-    "Emergency Leakage & Pipe Fix"
-  ][i % 4],
-  description: "Providing high-quality professional service with 6 months warranty. We ensure clean work and use genuine parts only.",
-  price: 1500 + (i * 100),
-  category: ["SOLAR_EXPERT", "AC_TECHNICIAN", "CARPENTER", "PLUMBER"][i % 4],
-  city: ["Lahore", "Karachi", "Islamabad"][i % 3],
-  area: ["Gulberg", "DHA Phase 5", "Bahria Town", "Saddar"][i % 4], // Added Area variable
-  posted: `${i + 1}h ago`,
-  worker: {
-    user: {
-      name: ["Zubair Khan", "Arsalan Arif", "Kamran Khan", "Sajid Ali"][i % 4]
+// const GIGS_DATA = Array.from({ length: 40 }).map((_, i) => ({
+//   id: `${i + 1}`,
+//   title: [
+//     "Expert Solar Panel Installation & Cleaning",
+//     "Professional AC Gas Refilling",
+//     "Modern Kitchen Woodwork",
+//     "Emergency Leakage & Pipe Fix"
+//   ][i % 4],
+//   description: "Providing high-quality professional service with 6 months warranty. We ensure clean work and use genuine parts only.",
+//   price: 1500 + (i * 100),
+//   category: ["SOLAR_EXPERT", "AC_TECHNICIAN", "CARPENTER", "PLUMBER"][i % 4],
+//   city: ["Lahore", "Karachi", "Islamabad"][i % 3],
+//   area: ["Gulberg", "DHA Phase 5", "Bahria Town", "Saddar"][i % 4], // Added Area variable
+//   posted: `${i + 1}h ago`,
+//   worker: {
+//     user: {
+//       name: ["Zubair Khan", "Arsalan Arif", "Kamran Khan", "Sajid Ali"][i % 4]
+//     }
+//   }
+// }));
+
+interface GigListProps{
+  visibleGigs: {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    category: string;
+    city: string;
+    area: string;
+    posted: string;
+    worker: {
+      user: {
+        name: string;
+      }
     }
-  }
-}));
+  }[];
+}
 
 // Helper to clean up Prisma Enums (e.g., SOLAR_EXPERT -> Solar Expert)
 const formatEnum = (text: string) => text.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
 
-export default function GigsList() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function GigsList({visibleGigs }: GigListProps) {
+  // const router = useRouter();
+  // const searchParams = useSearchParams();
   
   // State from URL or Defaults
-  const [city, setCity] = useState(searchParams.get('location') || 'Lahore');
-  const [category, setCategory] = useState(searchParams.get('category') || 'All');
-  const [sort, setSort] = useState(searchParams.get('filter') || 'recent');
+  // const [city, setCity] = useState(searchParams.get('location') || 'Lahore');
+  // const [category, setCategory] = useState(searchParams.get('category') || 'All');
+  // const [sort, setSort] = useState(searchParams.get('filter') || 'recent');
 
   // Logic for Pagination
-  const PAGE_SIZE = 10;
-  const currentPage = Number(searchParams.get('page')) || 1;
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const visibleGigs = GIGS_DATA.slice(startIndex, startIndex + PAGE_SIZE);
+  // const PAGE_SIZE = 10;
+  // const currentPage = Number(searchParams.get('page')) || 1;
+  // const startIndex = (currentPage - 1) * PAGE_SIZE;
+  // const visibleGigs = GIGS_DATA.slice(startIndex, startIndex + PAGE_SIZE);
 
-  const handlePagination = (event: React.ChangeEvent<unknown>, page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('filter', sort);
-    params.set('location', city);
-    params.set('category', category);
-    params.set('page', page.toString());
+  // const handlePagination = (event: React.ChangeEvent<unknown>, page: number) => {
+  //   const params = new URLSearchParams(searchParams.toString());
+  //   params.set('filter', sort);
+  //   params.set('location', city);
+  //   params.set('category', category);
+  //   params.set('page', page.toString());
     
-    router.push(`/search/gigs?${params.toString()}`);
-  };
+  //   router.push(`/search/gigs?${params.toString()}`);
+  // };
 
   return (
     <Box>

@@ -86,7 +86,7 @@ model Gig {
   sequence    Int      @default(autoincrement()) @unique
   
   city        String
-  address     String
+  area     String
   lat         Float?
   lng         Float?
 
