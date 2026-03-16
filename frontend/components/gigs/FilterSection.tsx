@@ -4,7 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import {useState} from "react";
 import { useSearchParams, useRouter } from 'next/navigation';
 
-export default function FilterSection() {
+export default function FilterSection({showSearchBar=true}:any) {
 
   const searchParams = useSearchParams()
   const [filters, setFilters] = useState({
@@ -39,25 +39,62 @@ export default function FilterSection() {
     params.set("sortBy", filters.sortBy);
     params.set("page", "1");
 
-    router.replace(`?${params.toString()}`);
+    router.replace(`search?${params.toString()}`);
   }
 
   console.log("Search Params in FilterSection:", searchParams.toString());
   return (
     <Stack spacing={3} sx={{ mb: 4 }}>
       {/* Search Bar - Populated from Home Page query */}
-      <TextField
-        fullWidth
-        value={filters.searchText}
-        placeholder="Search for 'AC Repair' or 'Carpenter'..."
-        slotProps={{input:{startAdornment: <InputAdornment position="start"><SearchIcon color="action" /></InputAdornment>,}
-       
-          
-        }}
-        sx={{ bgcolor: 'background.paper', borderRadius: 2 }}
-         onChange={handleOnchange}
-         name="searchText"
-      />
+      {showSearchBar && (
+  <TextField
+    fullWidth
+    value={filters.searchText}
+    name="searchText"
+    onChange={handleOnchange}
+    onKeyDown={(e) => e.key === "Enter" && handleApplyFilters()}
+    placeholder="What service are you looking for?"
+    // This is the key to the professional look
+    slotProps={{
+      input:{
+        startAdornment: (
+        <InputAdornment position="start">
+          <SearchIcon color="action" sx={{ ml: 1 }} />
+        </InputAdornment>
+      ),
+      endAdornment: (
+        <InputAdornment position="end">
+          <Button
+            variant="outlined"
+            disableElevation
+            onClick={handleApplyFilters}
+            sx={{
+              mr: 1, // Pulls it slightly to the edge for a tighter fit
+              height: '36px', // Matches standard text field height
+              px: 2,
+              borderRadius: '8px 8px 8px 8px', // Rounds only the outer corners
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Search
+          </Button>
+        </InputAdornment>
+      ),
+      }
+    }}
+    sx={{
+      bgcolor: "background.paper",
+      borderRadius: '8px',
+      // Remove the double border effect when the button is inside
+      "& .MuiOutlinedInput-root": {
+        paddingRight: 0, 
+        pr: 0,
+        "& fieldset": { borderRadius: '8px' },
+      },
+    }}
+  />
+)}
 
       {/* Row of Dropdowns */}
       <Stack direction={{ xs: 'row', sm: 'row' }} sx={{ mb: 4, flexWrap:"wrap",gap:2,justifyContent:"flex-start",}}>
