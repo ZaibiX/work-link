@@ -3,71 +3,6 @@ import { prisma } from "../utils/prisma.js";
 import {SkillCategory } from "../../generated/prisma/enums.js";
 
 
-
-// async function getHomeData(req: Request, res: Response) {
-
-//     const CITY: string = req.query.city ? (req.query.city as string) : "Lahore";
-//     const PAGE: number = req.query.page ? parseInt(req.query.page as string) : 1;
-//     const LIMIT: number = 10;
-//     const SKIP: number = (PAGE - 1) * LIMIT;
-    
-//     try{
-//           const totalGigs = await prisma.gig.count({
-//         where: {
-//             city: CITY,
-//             isActive: true,
-//             isDeleted: false
-//         }
-//     });
-
-     
-
-//     const recentGigs = await prisma.gig.findMany({
-//         take: LIMIT,
-//         skip: SKIP,
-//         orderBy: {
-//             createdAt: "desc",
-//         },
-//         where: {
-//             isActive: true,
-//             isDeleted: false,
-//             city: CITY
-//         },
-
-//         select: {
-//             id: true,
-//             title: true,
-//             description: true,
-//             price: true,
-//             category: true,
-//             address: true,
-//             city: true,
-//             worker: {
-//                 select: {
-//                     user: {
-//                         select: {
-
-//                             name: true,
-
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     });
-    
-//   res.status(200).json({ status: "success", data: {recentGigs, totalGigs } });
-//   return;
-//     }
-//     catch(err){
-
-//         res.status(500).json({ status: "error", message: "An error occurred while fetching home data." });
-//         return;
-//     }
-  
-
-// }
-
  const searchGigs = async (req: Request, res: Response) => {
   //req.params: category, city, sortBy, searchText, page
   console.log("from backend req.query: ",req.query);
@@ -161,47 +96,13 @@ import {SkillCategory } from "../../generated/prisma/enums.js";
   }
 };
 
-// async function getRecentGigs(req: Request, res: Response) {
-//     // Implement your logic to fetch recent gigs here, e.g., query the database for the latest gigs
-//     const PAGE: number = req.query.page ? parseInt(req.query.page as string) : 1;
-//     const LIMIT: number = 10;
-//     const SKIP: number = (PAGE - 1) * LIMIT;
-//     const recentGigs = await prisma.gig.findMany({
-//         take: LIMIT,
-//         skip: SKIP,
-//         orderBy: {
-//             createdAt: "desc",
-//         },
-//         where: {
-//             isActive: true,
-//             isDeleted: false
-//         },
+function getSingleGig(req: Request, res:Response){
+  const {gigId} = req.params;
+  
+}
 
-//         select: {
-//             id: true,
-//             title: true,
-//             description: true,
-//             price: true,
-//             category: true,
-//             address: true,
-//             city: true,
-//             worker: {
-//                 select: {
-//                     user: {
-//                         select: {
 
-//                             name: true,
-
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     });
-
-//     res.status(200).json({ status: "success", data: recentGigs });
-// }
-export { searchGigs };
+export { searchGigs, getSingleGig };
 
 
 

@@ -53,7 +53,7 @@ interface GigListProps{
     category: string;
     city: string;
     area: string;
-    posted: string;
+    // posted: string;
     worker: {
       user: {
         name: string;
@@ -190,12 +190,12 @@ export default function GigsList({visibleGigs }: GigListProps) {
                   {gig.description}
                 </Typography>
 
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+                {/* <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
                   <AccessTimeIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
                   <Typography variant="caption" color="text.disabled" sx={{ fontWeight: 600 }}>
                     Posted {gig.posted}
                   </Typography>
-                </Stack>
+                </Stack> */}
 
                 <Divider sx={{ my: 2, borderStyle: 'dashed' }} />
 
