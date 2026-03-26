@@ -176,11 +176,13 @@ import GigsList from "@/components/gigs/Gigs";
 import GigsSkeleton from "@/components/gigs/GigsSkeleton";
 import axiosInstance from "@/utils/axiosInstance";
 
+
+
 export default function LatestOpportunities(){
 
   const [gigs, setGigs] = useState([]);
   const [totalPages, setTotalPages] = useState(1)
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -200,7 +202,8 @@ export default function LatestOpportunities(){
       const {totalGigs} = response.data
       setTotalPages(Math.ceil(totalGigs /20));
      }
-     catch(err){
+     catch(err: any){
+      console.error(err)
       throw err;
      }finally{
       setLoading(false);

@@ -10,6 +10,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import axiosInstance from "@/utils/axiosInstance";
 
 const SKILL_CATEGORIES = ["AC_TECHNICIAN", "ELECTRICIAN", "PLUMBER", "SOLAR_EXPERT", "PAINTER", "CARPENTER", "OTHER"];
 
@@ -17,6 +18,8 @@ export default function CreateGig() {
   const params = useParams();
   const router = useRouter();
   const workerId = params.workerId;
+  const sampleId = "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+  
 
   const [formData, setFormData] = useState({
     title: "",
@@ -25,7 +28,7 @@ export default function CreateGig() {
     category: "",
     customSkill: "",
     city: "Lahore",
-    address: "",
+    area: "",
   });
 
   // State for errors - remains empty until Submit is clicked
@@ -40,7 +43,7 @@ export default function CreateGig() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     
     // VALIDATION TRIGGERED ONLY HERE
@@ -50,7 +53,7 @@ export default function CreateGig() {
     if (!formData.description.trim()) newErrors.description = "Please provide a description";
     if (!formData.price || Number(formData.price) <= 0) newErrors.price = "Enter a valid price";
     if (!formData.category) newErrors.category = "Please select a category";
-    if (!formData.address.trim()) newErrors.address = "Area address is required";
+    if (!formData.area.trim()) newErrors.area = "Area address is required";
     
     if (formData.category === "OTHER" && !formData.customSkill.trim()) {
       newErrors.customSkill = "Please specify your custom skill";
@@ -61,7 +64,15 @@ export default function CreateGig() {
     // If no errors, proceed with submission
     if (Object.keys(newErrors).length === 0) {
       console.log("Validation passed. Submitting Gig for:", workerId, formData);
+
+      try{
+        const response = await axiosInstance.post(`worker/gig/${workerId}`, formData);
       router.push('/worker/dashboard');
+
+
+      }catch(err : any){
+        console.error(err.response?.data?.message)
+      }
     }
   };
 
@@ -69,7 +80,7 @@ export default function CreateGig() {
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Button 
         component={Link} 
-        href="/worker/dashboard" 
+        href={"/worker/dashboard/"+ workerId } 
         startIcon={<ArrowBackIcon />} 
         sx={{ mb: 3, fontWeight: 700, color: 'text.secondary', textTransform: 'none' }}
       >
@@ -194,10 +205,10 @@ export default function CreateGig() {
                 fullWidth
                 label="Area Address"
                 placeholder="e.g., Gulberg III"
-                value={formData.address}
-                onChange={(e) => setFormData({...formData, address: e.target.value})}
-                error={!!errors.address}
-                helperText={errors.address}
+                value={formData.area}
+                onChange={(e) => setFormData({...formData, area: e.target.value})}
+                error={!!errors.area}
+                helperText={errors.area}
               />
             </Grid>
 

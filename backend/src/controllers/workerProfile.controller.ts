@@ -100,9 +100,19 @@ export async function getWorkerProfile(req: Request, res: Response) {
     // Try find by worker profile id first
     let profile = await prisma.workerProfile.findUnique({
       where: { id: lookupKey },
-      include: {
-        gigs: true,
+      select: {
+        gigs: {select:{
+          id:true,
+          title:true,
+          price:true,
+          isActive: true,
+        }},
+        id:true,
         user: { select: { id: true, name: true, email: true } },
+        phone: true,
+        skillCategory:true,
+        status: true,
+
       },
     });
 
@@ -121,7 +131,7 @@ export async function getWorkerProfile(req: Request, res: Response) {
       return res.status(404).json({ error: "Worker profile not found." });
     }
 
-    return res.status(200).json({ data: profile });
+    return res.status(200).json({ profile });
   } catch (err) {
     console.error("getWorkerProfile error:", err);
     return res.status(500).json({ error: "Internal server error" });
@@ -129,11 +139,13 @@ export async function getWorkerProfile(req: Request, res: Response) {
 }
 
 export async function updateWorkerProfile(req: Request, res: Response) {
-  try {
-    const { userId } = req.params as { userId: string };
-    const { phone, skillCategory, country, city, experienceYears, cnic } = req.body;
 
-    // Check if the skillCategory is allowed
+  console.log("Data to update: ", req.body);
+  try {
+    const workerId = String(req.params.workerId);
+    const { phone, skillCategory, user, status } = req.body;
+
+    // 1. Validation for skillCategory (keep your existing logic)
     if (skillCategory && !ALLOWED_SKILLS.includes(skillCategory as SkillCategory)) {
       return res.status(400).json({
         success: false,
@@ -141,43 +153,47 @@ export async function updateWorkerProfile(req: Request, res: Response) {
       });
     }
 
-    // Check if the worker profile exists
-    const existingProfile = await prisma.workerProfile.findUnique({ where: { userId } });
-    if (!existingProfile) {
-      return res.status(404).json({
-        success: false,
-        message: "Worker profile not found"
-      });
+    // 2. Build the Prisma-compliant update object
+    // We use 'any' or the specific Prisma generated type to avoid the assignment error
+    const data: any = {}; 
+
+    if (phone) data.phone = phone;
+    if (status) data.status = status;
+    if (skillCategory) data.skillCategory = skillCategory;
+
+    // Correct way to handle nested user updates:
+    if (user && user.name) {
+      data.user = {
+        update: {
+          name: user.name
+        }
+      };
     }
 
-    // Prepare the data to update (only fields provided)
-    const updateData: Partial<typeof existingProfile> = {};
-    if (phone) updateData.phone = phone;
-    if (skillCategory) updateData.skillCategory = skillCategory as SkillCategory;
-    if (country) updateData.country = country;
-    if (city) updateData.city = city;
-    if (experienceYears !== undefined) updateData.experienceYears = experienceYears;
-    if (cnic) updateData.cnic = cnic;
-
+    // 3. Perform the update
     const updatedProfile = await prisma.workerProfile.update({
-      where: { userId },
-      data: updateData,
-      include: {
-        user: {
+      where: { id: workerId },
+      data: data, // Prisma now knows to update the linked User's name
+      select: {
+        gigs: {
           select: {
             id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
+            title: true,
+            price: true,
+            isActive: true,
+          }
         },
+        user: { select: { id: true, name: true, email: true } },
+        phone: true,
+        skillCategory: true,
+        status: true,
       },
     });
 
     return res.status(200).json({
       success: true,
       message: "Worker profile updated successfully",
-      data: updatedProfile,
+      profile: updatedProfile,
     });
 
   } catch (error: any) {

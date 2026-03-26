@@ -4,12 +4,16 @@ import dotenv from 'dotenv';
 import userRouter from './src/routes/user.route.js';
 import workerRouter from './src/routes/worker.route.js';
 
+const corsOptions = {
+  origin:["http://192.168.0.107:3000", "http://localhost:3000"],
+}
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 

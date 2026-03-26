@@ -62,6 +62,7 @@ model WorkerProfile {
   city            String
   experienceYears Int
   cnic            String   @unique
+  allowedGigs     Int      @default(3)
 
   status          WorkerStatus @default(AVAILABLE)
 
