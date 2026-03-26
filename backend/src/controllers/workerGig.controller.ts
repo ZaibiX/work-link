@@ -190,14 +190,16 @@ export async function updateWorkerGig(req: Request, res: Response) {
 // DELETE /worker/gigs/:gigId
 export async function deleteWorkerGig(req: Request, res: Response) {
   try {
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    // const { id: userId } = (req as AuthenticatedRequest).user;
+    const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+
     const { gigId } = req.params as { gigId: string };
 
     const { count } = await prisma.gig.deleteMany({
       where: {
         id: gigId,
-        worker: { userId },
-        isDeleted: false,
+        workerId: workerId,
+        // isDeleted: false,
       },
     });
 

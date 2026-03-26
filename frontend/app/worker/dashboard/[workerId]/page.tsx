@@ -44,6 +44,26 @@ export default function ProfileManagement() {
     // const isLimitReached = gigs.length >= 3;
     const isLimitReached = false;
 
+    async function handleDeleteGig(gigId: string){
+        try{
+            const confirmation = window.confirm("Are you sure you want to delete this gig?");
+            if(confirmation){
+            const response = await axiosInstance.delete(`worker/gig/${gigId}`)
+
+            setGigs((prev)=>{
+                return (prev.filter((gig)=>{
+                    if(gig.id!=gigId)
+                        return gig;
+                    }));
+            });
+
+            }
+        }catch(err:any){
+                console.error(err.response?.data?.message || err.message);
+
+        }
+    }
+
     async function handleSaveChanges() {
 
         try{
@@ -233,7 +253,7 @@ export default function ProfileManagement() {
                                                 Edit
                                             </Button>
 
-                                            <Button variant="outlined" size="small" color="error" endIcon={<DeleteIcon />} >
+                                            <Button variant="outlined" size="small" color="error" endIcon={<DeleteIcon />} onClick={()=>{handleDeleteGig(gig.id)}} >
                                                 Delete
                                             </Button>
                                         </Stack>
