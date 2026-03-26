@@ -9,8 +9,8 @@ workerRouter.get("/profile/:workerId", getWorkerProfile);
 workerRouter.put("/profile/:workerId", updateWorkerProfile);
 workerRouter.post("/profile/:userId", createWorkerProfile);
 
-workerRouter.get("/gigs", mockAuth, getWorkerGigs);
-workerRouter.post("/gig/:workerId", createWorkerGig);
+// workerRouter.get("/gigs", mockAuth, getWorkerGigs); not yet used
+workerRouter.post("/gig", createWorkerGig);
 workerRouter.put("/gig/:gigId", mockAuth,updateWorkerGig);
 workerRouter.delete("/gig/:gigId",mockAuth ,deleteWorkerGig);
 workerRouter.get("/gig/:gigId", mockAuth, getWorkerGigById);

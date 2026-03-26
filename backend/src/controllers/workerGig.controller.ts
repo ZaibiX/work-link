@@ -20,11 +20,13 @@ interface AuthenticatedRequest extends Request {
 // ---------------------------------------------------------------------------
 export async function getWorkerGigs(req: Request, res: Response) {
   try {
-    const { id: userId } = (req as AuthenticatedRequest).user;
+    // const { id: userId } = (req as AuthenticatedRequest).user;
+    const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+
 
     const gigs = await prisma.gig.findMany({
       where: {
-        worker: { userId },
+        workerId: workerId,
         isDeleted: false,
       },
       orderBy: { createdAt: "desc" },
@@ -94,7 +96,9 @@ export async function createWorkerGig(req: Request, res: Response) {
     // }
 
     const { title, description, price, category, city, area, lat, lng , customSkill} = req.body;
-    const workerId: string = String(req.params.workerId);
+    // const workerId: string = String(req.params.workerId);
+    const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+
     console.log("workerId: ", workerId);
     // Fetch the worker profile id — needed for the relation
     // This is the only extra DB call and it's unavoidable since req.user doesn't carry workerId

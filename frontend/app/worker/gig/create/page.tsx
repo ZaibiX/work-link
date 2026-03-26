@@ -66,7 +66,7 @@ export default function CreateGig() {
       console.log("Validation passed. Submitting Gig for:", workerId, formData);
 
       try{
-        const response = await axiosInstance.post(`worker/gig/${workerId}`, formData);
+        const response = await axiosInstance.post(`worker/gig`, formData);
       router.push('/worker/dashboard');
 
 

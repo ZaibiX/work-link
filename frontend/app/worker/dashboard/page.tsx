@@ -266,7 +266,7 @@ export default function ProfileManagement() {
                     {/* Add Gig Button remains visible but disables at limit */}
                     <Button
                         component={isLimitReached ? "button" : Link}
-                        href={!isLimitReached ? `/worker/gig/create/${profile.id}` : undefined}
+                        href={!isLimitReached ? `/worker/gig/create` : undefined}
                         variant="outlined"
 
                         disabled={isLimitReached}
