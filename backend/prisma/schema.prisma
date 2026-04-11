@@ -37,6 +37,11 @@ enum SkillCategory {
   OTHER
 }
 
+enum AuthStrategy{
+  LOCAL
+  GOOGLE
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -45,7 +50,7 @@ model User {
   role      UserRole  @default(CLIENT) // "CLIENT" or "WORKER"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  authStrategy AuthStrategy @default(LOCAL)
   //Soft Delete Flag
   isDeleted Boolean  @default(false)
   
