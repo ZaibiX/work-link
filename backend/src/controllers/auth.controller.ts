@@ -119,3 +119,21 @@ export async function loginLocal(req: Request, res: Response){
 export async function logoutLocal(req: Request, res: Response) {
     return res.status(200).clearCookie("jwt").json({ message: "Logged out successfully" });
 }
+
+export const handleGoogleCallback = (req: Request, res: Response) => {
+    const user = req.user as any; // Passport attached the user found/created in your strategy
+
+    // Create the JWT
+    const payload = { email: user.email, id: user.id };
+    const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: "7d" });
+
+    // Set cookie and redirect back to your frontend
+    return res
+        .cookie("jwt", token, { 
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        }).json({ message: "Google login successful", userId: user.id });
+        //.redirect("http://localhost:3000/dashboard"); // Redirect to your Worklink frontend
+};
