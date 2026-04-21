@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { styled, useTheme, useColorScheme } from '@mui/material/styles'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
@@ -31,8 +31,22 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 // import DarkModeIcon from "@mui/icons-material/DarkMode";
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import useMediaQuery from "@mui/material/useMediaQuery";
+import Link from 'next/link';
+import axiosInstance from '@/utils/axiosInstance';
+import useAuth from '@/utils/store/authStore';
 
 
+async function handleLogout() {
+  if(window.confirm("Are you sure you want to logout?")){
+    try{
+    await axiosInstance.delete("/auth/logout/local");
+    // Optionally, you can also update the UI or redirect the user after logout
+    window.location.href = "/"; // Redirect to home page after logout
+  } catch (error) {
+    console.error("Error during logout:", error);
+  }
+  }
+}
 interface Props {
   /**
    * Injected by the documentation to work in an iframe.
@@ -74,6 +88,25 @@ export default function HideAppBar(props: Props) {
   const [mobileOpen, setMobileOpen] = React.useState(false)
   const { mode, setMode } = useColorScheme();
   // setMode("system");
+const { logout, authLoading, user } = useAuth();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // useEffect(() => {
+  //   // Check authentication status on component mount
+  //   const checkAuthStatus = async () => {
+  //     try {
+  //       const response = await axiosInstance.get("/auth/check-auth", { withCredentials: true });
+  //       setIsLoggedIn(response.data.isAuthenticated);
+  //     } catch (error) {
+  //       console.error("Error checking auth status:", error);
+  //       setIsLoggedIn(false);
+  //     }
+  //   };
+
+  //   checkAuthStatus();
+  // }, []);
+
   const toggleColorMode = () => {
     setMode(mode === "light" ? "dark" : "light");
   };
@@ -175,8 +208,13 @@ export default function HideAppBar(props: Props) {
          </List>
         </Box>
         {/* <Divider flexItem/> */}
-        <Button variant="outlined" size="large" sx={{ width: "90%", textTransform: "none" }}>Login</Button>
-        <Button variant="contained" size="large" sx={{ width: "90%", textTransform: "none" }}>Create Account</Button>
+        {user ? (<Button onClick={logout} variant="outlined" size="large" sx={{ width: "90%", textTransform: "none" }}>Logout</Button>):(
+          <>
+        <Button component={Link} href="/login" variant="outlined" size="large" sx={{ width: "90%", textTransform: "none" }}>Login</Button>
+        <Button component={Link} href="/register" variant="contained" size="large" sx={{ width: "90%", textTransform: "none" }}>Create Account</Button>
+        </>
+        )}
+        
       </Box>
     </Box>
   )
@@ -251,8 +289,11 @@ export default function HideAppBar(props: Props) {
                 {mode === "dark" ? <LightModeIcon color='primary' /> : <DarkModeOutlinedIcon color='primary' />}
               </IconButton>
 
-              <Button variant="outlined" size="medium" sx={{ textTransform: "none" }}>Login</Button>
-              <Button variant="contained" size="medium" sx={{ textTransform: "none" }}>Create Account</Button>
+            {user ? (<Button onClick={logout} variant="outlined" size="large" sx={{ textTransform: "none" }}>Logout</Button>):(
+              <>
+              <Button component={Link} href="/login" variant="outlined" size="medium" sx={{ textTransform: "none" }}>Login</Button>
+              <Button component={Link} href="/register" variant="contained" size="medium" sx={{ textTransform: "none" }}>Create Account</Button></>
+            )}
             </Box>
             {/* Hamburger Icon for mobile (hidden when drawer is open) */}
             <IconButton

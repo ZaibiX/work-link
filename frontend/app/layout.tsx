@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+// import "./globals.css";
 import AppThemeProvider from "./providers/ThemeProvider";
 import Navbar from "@/components/navbar/Navbar";
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
@@ -9,6 +9,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { getTheme } from "@/theme/theme";
 import CssBaseline from "@mui/material/CssBaseline";
 import Footer from "@/components/footer/Footer";
+import AuthLoader from "@/components/authLoader/AuthLoader";
 
 
 
@@ -47,6 +48,7 @@ export default function RootLayout({
           <ThemeProvider theme={getTheme}>
             <CssBaseline enableColorScheme />
 
+            <AuthLoader />
             <Navbar />
             {children}
             <Footer/>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerLocal, registerUserGoogle, loginLocal, handleGoogleCallback, logoutLocal } from '../controllers/auth.controller.js';
+import { registerLocal, registerUserGoogle, loginLocal, handleGoogleCallback, logoutLocal, checkAuth } from '../controllers/auth.controller.js';
 import passport from '../config/passport.js';
 const authRouter = express.Router();
 
@@ -21,5 +21,6 @@ authRouter.get("/google/callback",
     handleGoogleCallback // This controller function will issue the JWT
 );
 
+authRouter.get("/check-auth", checkAuth);
 
 export default authRouter;

@@ -3,7 +3,7 @@ import { Box, Paper, Container, Typography, Divider, Button, Stack } from "@mui/
 import GoogleIcon from '@mui/icons-material/Google';
 
 export const AuthWrapper = ({ title, subtitle, children, onGoogleClick }: any) => (
-  <Container maxWidth="xs" sx={{ py: { xs: 4, md: 10 } }}>
+  <Container maxWidth="sm" sx={{ py: { xs: 4, md: 10 } }}>
     <Paper 
       elevation={0} 
       sx={{ 

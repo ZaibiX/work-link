@@ -4,7 +4,8 @@ const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/api/',
   // baseURL:"http://192.168.0.107:5000/api/",
   timeout: 60000,
-  headers: {'X-Custom-Header': 'foobar'}
+  headers: {'X-Custom-Header': 'foobar'},
+  withCredentials: true, // This allows cookies to be sent with requests
 });
 
 export default axiosInstance;

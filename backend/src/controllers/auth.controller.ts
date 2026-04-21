@@ -83,6 +83,10 @@ export async function registerUserGoogle(req: Request, res: Response)
 export async function loginLocal(req: Request, res: Response){
     const {email, password} = req.body;
     console.log("Login attempt with email:", email, password);
+    console.log("cookies: ",req.cookies);
+    if(!email||!password){
+        return res.status(400).json({ message: "Email and password are required" });
+    }
     
     
     try{
@@ -108,7 +112,7 @@ export async function loginLocal(req: Request, res: Response){
 
         const token = jwt.sign(payload, process.env.JWT_SECRET!, options);
 
-        return res.status(200).cookie("jwt",token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict",maxAge:1000*60*60 }).json({ message: "Login successful", userId: user.id });
+        return res.status(200).cookie("jwt",token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax",maxAge:1000*60*60 }).json({ message: "Login successful", userId: user.id });
 
     }catch(error){
         console.error("Error during login:", error);
@@ -137,3 +141,25 @@ export const handleGoogleCallback = (req: Request, res: Response) => {
         }).json({ message: "Google login successful", userId: user.id });
         //.redirect("http://localhost:3000/dashboard"); // Redirect to your Worklink frontend
 };
+
+export function checkAuth(req: Request, res: Response)
+{
+    const token = req.cookies.jwt;
+    if (!token) {
+        // We return 200 (Success) because the "check" was successful
+        // even if the result is "not logged in"
+        return res.status(200).json({ 
+            isAuthenticated: false, 
+            user: null 
+        });
+    }
+
+    try{
+        const decoded= jwt.verify(token, process.env.JWT_SECRET!) as { email: string, id: number };
+        return res.status(200).json({ message: "Authenticated", userId: decoded.id, isAuthenticated: true });
+    }
+    catch(error){
+        console.error("Error verifying token:", error);
+        return res.status(401).json({ message: "Unauthorized" , isAuthenticated: false});
+    }
+}
