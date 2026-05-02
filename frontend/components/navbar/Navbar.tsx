@@ -211,7 +211,7 @@ const { logout, authLoading, user } = useAuth();
         {user ? (<Button onClick={logout} variant="outlined" size="large" sx={{ width: "90%", textTransform: "none" }}>Logout</Button>):(
           <>
         <Button component={Link} href="/login" variant="outlined" size="large" sx={{ width: "90%", textTransform: "none" }}>Login</Button>
-        <Button component={Link} href="/register" variant="contained" size="large" sx={{ width: "90%", textTransform: "none" }}>Create Account</Button>
+        <Button component={Link} href="/signup" variant="contained" size="large" sx={{ width: "90%", textTransform: "none" }}>Create Account</Button>
         </>
         )}
         
@@ -292,7 +292,7 @@ const { logout, authLoading, user } = useAuth();
             {user ? (<Button onClick={logout} variant="outlined" size="large" sx={{ textTransform: "none" }}>Logout</Button>):(
               <>
               <Button component={Link} href="/login" variant="outlined" size="medium" sx={{ textTransform: "none" }}>Login</Button>
-              <Button component={Link} href="/register" variant="contained" size="medium" sx={{ textTransform: "none" }}>Create Account</Button></>
+              <Button component={Link} href="/signup" variant="contained" size="medium" sx={{ textTransform: "none" }}>Create Account</Button></>
             )}
             </Box>
             {/* Hamburger Icon for mobile (hidden when drawer is open) */}

@@ -13,6 +13,8 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import Link from "next/link";
 import axiosInstance from "@/utils/axiosInstance"
+// import useAuth from "@/utils/store/authStore";
+// import { useRouter } from "next/navigation";
 
 const MOCK_WORKER = {
     id: "worker-123",
@@ -36,6 +38,7 @@ export default function ProfileManagement() {
     const sampleId = "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
     const [profile, setProfile] = useState(MOCK_WORKER);
     const [gigs, setGigs] = useState(MOCK_WORKER.gigs);
+    
 
     const handleToggleActive = (id: string) => {
         setGigs(gigs.map(g => g.id === id ? { ...g, isActive: !g.isActive } : g));
@@ -107,15 +110,21 @@ export default function ProfileManagement() {
             } catch (err: any) {
                 console.error(err.response?.data?.message || err.message);
             }
-
-
-
         }
+        
 
         fetchProfileDetails();
     }, [])
 
-
+    // if(authLoading || !user){
+    //     return (
+    //         <Container maxWidth="md" sx={{ py: 6 }}>
+    //             <Typography variant="h4" sx={{ fontWeight: 900, mb: 4 }}>
+    //                 Loading Profile...
+    //             </Typography>
+    //         </Container>
+    //     );
+    // }
     return (
         <Container maxWidth="md" sx={{ py: 6 }}>
             <Typography variant="h4" sx={{ fontWeight: 900, mb: 4 }}>

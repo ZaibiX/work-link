@@ -7,10 +7,20 @@ const ALLOWED_STATUS = Object.values(WorkerStatus);
 
 
 export async function createWorkerProfile(req: Request, res: Response) {
+  // console.log("from create worker profile: cookie", req.cookies);
+
+  if(!req.user || !(req.user as any).id){
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  console.log("User from auth middleware:", req.user);
   try {
     // console.log("body:", req.body);
-    const { userId } = req.params as { userId: string };
-    const { phone, skillCategory, country, city, experienceYears, cnic } = req.body;
+    const userId = (req.user as any)?.id;
+    const { phone, skillCategory, country, city, experienceYears, cnic, agreed } = req.body;
+    if(!agreed){
+      return res.status(400).json({ success: false, message: "You must agree to the terms to create a worker profile" });
+    }
 
     const existingProfile = await prisma.workerProfile.findUnique({ where: { userId } });
     if (!ALLOWED_SKILLS.includes(skillCategory as SkillCategory)) {
@@ -87,11 +97,14 @@ export async function createWorkerProfile(req: Request, res: Response) {
 
 
 export async function getWorkerProfile(req: Request, res: Response) {
+  if(!req.user || !(req.user as any).id){
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
   // Implementation for getting worker profile
   try {
-    const param: string = String(req.params.workerId) ?? "";
-    const queryUserId: string = req.query.userId ? String(req.query.userId) : "";
-    const lookupKey: string = param ?? queryUserId;
+    // const param: string = String(req.params.workerId) ?? "";
+    // const queryUserId: string = req.query.userId ? String(req.query.userId) : "";
+    const lookupKey: string = (req.user as any)?.id;
 
     if (!lookupKey) {
       return res.status(400).json({ error: "Provide worker id or userId (route param or query)." });
@@ -140,9 +153,13 @@ export async function getWorkerProfile(req: Request, res: Response) {
 
 export async function updateWorkerProfile(req: Request, res: Response) {
 
+  if(!req.user || !(req.user as any).id){
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   console.log("Data to update: ", req.body);
   try {
-    const workerId = String(req.params.workerId);
+    const workerId = (req.user as any)?.id; // Assuming workerId is same as userId from auth middleware
     const { phone, skillCategory, user, status } = req.body;
 
     // 1. Validation for skillCategory (keep your existing logic)

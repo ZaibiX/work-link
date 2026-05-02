@@ -7,6 +7,8 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 // jwt strategy
 
 var cookieExtractor = function(req: Request) {
+
+    // console.log("cookie extractor, req.cookies:", req.cookies);
     var token = null;
     if (req && req.cookies) {
         token = req.cookies['jwt'];
@@ -20,6 +22,8 @@ const options = {
 }
 
 passport.use(new jwtStrategy(options, async function(jwtPayload:any, next:any){
+
+  // console.log("from passport jwt strategy, payload:", jwtPayload);
     try{
         const user = await prisma.user.findUnique({
             where: { email: jwtPayload.email },

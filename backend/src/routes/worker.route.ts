@@ -2,18 +2,20 @@ import express from "express";
 import { getWorkerProfile, updateWorkerProfile,  createWorkerProfile } from "../controllers/workerProfile.controller.js";
 import {getWorkerGigs, createWorkerGig, updateWorkerGig, deleteWorkerGig, getWorkerGigById,} from "../controllers/workerGig.controller.js";
 import { mockAuth } from "../middleware/mockAuth.js";
+import protectRoute from "../middleware/protectRoute.js";
+import passport from "../config/passport.js"
 
 const workerRouter = express.Router();  
 
-workerRouter.get("/profile/:workerId", getWorkerProfile);
-workerRouter.put("/profile/:workerId", updateWorkerProfile);
-workerRouter.post("/profile/:userId", createWorkerProfile);
+workerRouter.get("/profile/:workerId", protectRoute([]), getWorkerProfile);
+workerRouter.put("/profile/:workerId", protectRoute([]), updateWorkerProfile);
+workerRouter.post("/profile", passport.authenticate("jwt", { session: false }), protectRoute([]), createWorkerProfile);
 
 // workerRouter.get("/gigs", mockAuth, getWorkerGigs); not yet used
-workerRouter.post("/gig", createWorkerGig);
-workerRouter.put("/gig/:gigId", mockAuth,updateWorkerGig);
-workerRouter.delete("/gig/:gigId",mockAuth ,deleteWorkerGig);
-workerRouter.get("/gig/:gigId", mockAuth, getWorkerGigById);
+workerRouter.post("/gig", protectRoute(["worker"]), createWorkerGig);
+workerRouter.put("/gig/:gigId", protectRoute(["worker"]),updateWorkerGig);
+workerRouter.delete("/gig/:gigId",protectRoute(["worker"]) ,deleteWorkerGig);
+workerRouter.get("/gig/:gigId", protectRoute(["worker"]), getWorkerGigById);
 
 // workerRouter.get("/manage-profile/:workerId");
 // workerRouter.get("/my-gigs/:workerId");

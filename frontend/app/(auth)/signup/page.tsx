@@ -4,6 +4,8 @@ import { TextField, Button, Box, Link as MuiLink, Stack, Typography } from "@mui
 import Link from "next/link";
 import { AuthWrapper } from "@/components/authWrapper/AuthWrapper"; // adjust path
 import axiosInstance from "@/utils/axiosInstance";
+import useAuth from "@/utils/store/authStore";
+
 
 async function handleGoogleSignup() {
   try {
@@ -35,6 +37,8 @@ async function handleLocalSignup(formData: { name: string; email: string; passwo
 }
 
 export default function SignupPage() {
+const { registerLocal, loginGoogle } = useAuth();
+
   const [formData, setFormData] = useState({ name: "",
     email: "",
     password: "",
@@ -49,7 +53,7 @@ export default function SignupPage() {
       title="Create your account" 
       subtitle="Get started and connect with experts"
       onGoogleClick={() => {console.log("Google Signup")
-      handleGoogleSignup();
+      loginGoogle();
       }}
     >
       <Box component="form" noValidate>
@@ -64,7 +68,7 @@ export default function SignupPage() {
             variant="contained" 
             size="large" 
             sx={{ py: 1.5, borderRadius: 2, fontWeight: 700 }}
-            onClick={() => handleLocalSignup(formData)}
+            onClick={() => registerLocal(formData.name, formData.email, formData.password)}
           >
             Sign Up
           </Button>

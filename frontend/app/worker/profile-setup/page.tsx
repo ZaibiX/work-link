@@ -8,6 +8,8 @@ import {
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import axiosInstance from "@/utils/axiosInstance";
+
 
 // Enums based on your Prisma Schema
 const SKILL_CATEGORIES = ["AC_TECHNICIAN", "ELECTRICIAN", "SOLAR_EXPERT", "PLUMBER", "CARPENTER", "OTHER"];
@@ -20,11 +22,12 @@ export default function CreateWorkerProfile() {
   const [cnic, setCnic] = useState("");
   const [city, setCity] = useState("Lahore");
   const [agreed, setAgreed] = useState(false);
+  const [country, setCountry] = useState("Pakistan"); // Defaulted to Pakistan as per marketplace scope
 
   // State for errors
   const [errors, setErrors] = useState<any>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validation logic only on submit
@@ -40,6 +43,21 @@ export default function CreateWorkerProfile() {
     if (Object.keys(newErrors).length === 0) {
       console.log("Submitting Data:", { skillCategory, experienceYears, phone, cnic, city, agreed });
       // Proceed with your submission logic
+
+      try{
+        const response = await axiosInstance.post("/worker/profile", {
+          skillCategory,
+          experienceYears: Number(experienceYears),
+          phone,
+          cnic,
+          city,
+          country,
+          agreed
+        });
+      } catch (error:any) {
+        console.error("Error submitting worker profile:", error.response?.data?.message|| error.message);
+
+      }
     }
   };
 

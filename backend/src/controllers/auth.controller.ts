@@ -32,13 +32,13 @@ export async function registerLocal(req: Request, res: Response)
         });
 
         // creating jwt token
-        const payload = { email: newUser.email, id: newUser.id };
+        const payload = { email: newUser.email, id: newUser.id, role: newUser.role };
         const options = { expiresIn: "1h" } as const;
 
         const token = jwt.sign(payload, process.env.JWT_SECRET!, options);
         // const token = jwt.sign({ email }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
-        return res.status(201).cookie("jwt",token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict",maxAge:1000*60*60 }).json({ message: "User registered successfully", userId: newUser.id,  });
+        return res.status(201).cookie("jwt",token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict",maxAge:1000*60*60 }).json({ message: "User registered successfully", user: { id: newUser.id, email: newUser.email, role: newUser.role } });
 
     }
     catch(error){
@@ -71,7 +71,7 @@ export async function registerUserGoogle(req: Request, res: Response)
             },
         });
 
-        return res.status(201).json({ message: "User registered successfully", userId: newUser.id });
+        return res.status(201).json({ message: "User registered successfully", user: { id: newUser.id, email: newUser.email, role: newUser.role } });
 
     }
     catch(error){
@@ -107,12 +107,12 @@ export async function loginLocal(req: Request, res: Response){
         }
 
         // creating jwt token
-        const payload = { email: user.email, id: user.id };
+        const payload = { email: user.email, id: user.id, role: user.role };
         const options = { expiresIn: "1h" } as const;
 
         const token = jwt.sign(payload, process.env.JWT_SECRET!, options);
 
-        return res.status(200).cookie("jwt",token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax",maxAge:1000*60*60 }).json({ message: "Login successful", userId: user.id });
+        return res.status(200).cookie("jwt",token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax",maxAge:1000*60*60 }).json({ message: "Login successful", user: { id: user.id, email: user.email, role: user.role } });
 
     }catch(error){
         console.error("Error during login:", error);
@@ -128,7 +128,7 @@ export const handleGoogleCallback = (req: Request, res: Response) => {
     const user = req.user as any; // Passport attached the user found/created in your strategy
 
     // Create the JWT
-    const payload = { email: user.email, id: user.id };
+    const payload = { email: user.email, id: user.id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
     // Set cookie and redirect back to your frontend
@@ -138,7 +138,7 @@ export const handleGoogleCallback = (req: Request, res: Response) => {
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-        }).json({ message: "Google login successful", userId: user.id });
+        }).json({ message: "Google login successful", user: { id: user.id, email: user.email, role: user.role } });
         //.redirect("http://localhost:3000/dashboard"); // Redirect to your Worklink frontend
 };
 
@@ -155,8 +155,8 @@ export function checkAuth(req: Request, res: Response)
     }
 
     try{
-        const decoded= jwt.verify(token, process.env.JWT_SECRET!) as { email: string, id: number };
-        return res.status(200).json({ message: "Authenticated", userId: decoded.id, isAuthenticated: true });
+        const decoded= jwt.verify(token, process.env.JWT_SECRET!) as { email: string, id: number, role: string };
+        return res.status(200).json({ message: "Authenticated", user: decoded, isAuthenticated: true, });
     }
     catch(error){
         console.error("Error verifying token:", error);
