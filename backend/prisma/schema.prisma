@@ -10,7 +10,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ... (Keep your existing generator and datasource blocks)
@@ -53,6 +55,10 @@ model User {
   authStrategy AuthStrategy @default(LOCAL)
   //Soft Delete Flag
   isDeleted Boolean  @default(false)
+
+  isEmailVerified        Boolean   @default(false)
+  verificationCode  String?   // 6-digit code
+  verificationCodeExpiry     DateTime?
   
   workerProfile WorkerProfile?
 }

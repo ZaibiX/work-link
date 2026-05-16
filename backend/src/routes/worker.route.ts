@@ -7,8 +7,8 @@ import passport from "../config/passport.js"
 
 const workerRouter = express.Router();  
 
-workerRouter.get("/profile/:workerId", protectRoute([]), getWorkerProfile);
-workerRouter.put("/profile/:workerId", protectRoute([]), updateWorkerProfile);
+workerRouter.get("/profile", passport.authenticate('jwt', { session: false }),protectRoute(["WORKER"]), getWorkerProfile);
+workerRouter.put("/profile/:workerId", passport.authenticate('jwt', { session: false }), protectRoute(["WORKER"]), updateWorkerProfile);
 workerRouter.post("/profile", passport.authenticate("jwt", { session: false }), protectRoute([]), createWorkerProfile);
 
 // workerRouter.get("/gigs", mockAuth, getWorkerGigs); not yet used

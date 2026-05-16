@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import {prisma} from "../utils/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import mailer from "../config/mailer.js";
 
 export async function registerLocal(req: Request, res: Response)
 {
@@ -13,25 +14,88 @@ export async function registerLocal(req: Request, res: Response)
             where: { email },
         });
 
-        if (existingUser) {
+        if (existingUser && existingUser.isEmailVerified) {
             return res.status(400).json({ message: "User already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit code
 
-        
+        const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // Code expires in 15 minutes
 
         // Create new user
-        const newUser = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                authStrategy: "LOCAL",
-            },
+        const newUser = await prisma.user.upsert({
+        where: { email },
+        update: {
+            name,
+            password: hashedPassword, // Wipes out the adversary's password
+            authStrategy: "LOCAL",
+            verificationCode,
+            verificationCodeExpiry,
+            // Keep isEmailVerified as false
+        },
+        create: {
+            name,
+            email,
+            password: hashedPassword,
+            authStrategy: "LOCAL",
+            verificationCode,
+            verificationCodeExpiry,
+            isEmailVerified: false,
+        },
+    });
+
+        // Send verification email
+        const mailOptions = {
+            from: process.env.SMTP_USER,
+            to: email,
+            subject: "Verify your email for Worklink",
+            text: `Your verification code is: ${verificationCode}. It expires in 15 minutes.`,
+        };
+        
+        try {
+            await mailer.sendMail(mailOptions);
+        } catch (error) {
+            console.error("Error sending verification email:", error);
+            return res.status(500).json({ message: "Error sending verification email" });
+        }
+
+        return res.status(200).json({ message: "Please check your email for the verification code." });
+        
+
+    }
+    catch(error){
+        console.error("Error registering user:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+export async function verifyEmail(req: Request, res: Response)
+{
+    const { email, verificationCode } = req.body;
+    try{
+        const newUser = await prisma.user.findUnique({
+            where: { email },
         });
 
-        // creating jwt token
+        if(!newUser){
+            return res.status(400).json({ message: "Invalid email or verification code" });
+        }
+
+        if(newUser.verificationCode !== verificationCode || !newUser.verificationCodeExpiry || newUser.verificationCodeExpiry < new Date()){
+            return res.status(400).json({ message: "Invalid or expired verification code" });
+        }
+
+        else if(newUser.verificationCode === verificationCode && newUser.verificationCodeExpiry && newUser.verificationCodeExpiry >= new Date()){
+            await prisma.user.update({
+                where: { email },
+                data: {
+                    isEmailVerified: true,
+                    verificationCode: null,
+                    verificationCodeExpiry: null,
+                },
+            });
+            // creating jwt token
         const payload = { email: newUser.email, id: newUser.id, role: newUser.role };
         const options = { expiresIn: "1h" } as const;
 
@@ -39,12 +103,14 @@ export async function registerLocal(req: Request, res: Response)
         // const token = jwt.sign({ email }, process.env.JWT_SECRET!, { expiresIn: "1h" });
 
         return res.status(201).cookie("jwt",token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "strict",maxAge:1000*60*60 }).json({ message: "User registered successfully", user: { id: newUser.id, email: newUser.email, role: newUser.role } });
-
+            // return res.status(200).json({ message: "Email verified successfully" });
+        }
     }
     catch(error){
-        console.error("Error registering user:", error);
+        console.error("Error verifying email:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
+
 }
 
 export async function registerUserGoogle(req: Request, res: Response)
