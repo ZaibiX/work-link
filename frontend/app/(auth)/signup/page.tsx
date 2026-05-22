@@ -45,6 +45,17 @@ const { registerLocal, loginGoogle } = useAuth();
     confirmPassword: "",
   });
 
+  const [error, setError] = useState("");
+
+  function handleRegisterLocal(){
+    if(formData.password !== formData.confirmPassword){
+      // console.error("Passwords do not match");
+      setError("Passwords do not match");
+      return;
+    }
+    registerLocal(formData.name, formData.email, formData.password);
+  }
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
@@ -63,12 +74,15 @@ const { registerLocal, loginGoogle } = useAuth();
           <TextField fullWidth label="Password" variant="outlined" type="password" name="password" onChange={handleChange} value={formData.password} />
           <TextField fullWidth label="Re-enter Password" variant="outlined" type="password" name="confirmPassword" onChange={handleChange} value={formData.confirmPassword} />
           
+          <Typography variant="body2" color="error">
+            {error}
+          </Typography>
           <Button 
             fullWidth 
             variant="contained" 
             size="large" 
             sx={{ py: 1.5, borderRadius: 2, fontWeight: 700 }}
-            onClick={() => registerLocal(formData.name, formData.email, formData.password)}
+            onClick={handleRegisterLocal}
           >
             Sign Up
           </Button>

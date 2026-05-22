@@ -1,9 +1,10 @@
 import express from 'express';
-import { registerLocal, registerUserGoogle, loginLocal, handleGoogleCallback, logoutLocal, checkAuth } from '../controllers/auth.controller.js';
+import { registerLocal, registerUserGoogle, loginLocal, handleGoogleCallback, logoutLocal, checkAuth, verifyEmail } from '../controllers/auth.controller.js';
 import passport from '../config/passport.js';
 const authRouter = express.Router();
 
 authRouter.post("/register/local", registerLocal);
+authRouter.post("/verify-email", verifyEmail);
 // authRouter.post("/register/google", registerUserGoogle);
 authRouter.post("/login/local", loginLocal);
 

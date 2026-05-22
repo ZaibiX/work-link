@@ -49,5 +49,7 @@ export default function LoginPage() {
         </Stack>
       </Box>
     </AuthWrapper>
+
+    
   );
 }

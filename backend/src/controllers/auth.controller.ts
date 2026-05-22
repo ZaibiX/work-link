@@ -159,7 +159,7 @@ export async function loginLocal(req: Request, res: Response){
         const user = await prisma.user.findUnique({
             where: { email },
         });
-        if(!user){
+        if(!user || !user.isEmailVerified){
             return res.status(400).json({ message: "Invalid email or password" });
         }
 

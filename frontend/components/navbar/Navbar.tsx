@@ -71,7 +71,11 @@ function HideOnScroll(props: Props) {
 }
 
 const drawerWidth = 240 // Standard drawer width for larger screens
-const navItems = ["Browse Workers", "Post a Gig", "Become a Worker",]
+const navItems = [
+  {text:"Browse Workers",
+    url:"#"
+
+}, {text:"Post a Gig", url:"/worker/dashboard"}, {text:"Become a Worker", url:"/worker/profile-setup"}]
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -143,9 +147,9 @@ const { logout, authLoading, user } = useAuth();
 
       <List sx={{ mt: "auto", width: "100%", p: 2,}}>
         {navItems.map((item) => (
-          <ListItem key={item} disablePadding sx={{ display: "flex", justifyContent: "space-between" }}>
-            <ListItemButton sx={{ textAlign: 'left' }}>
-              <ListItemText primary={item} />
+          <ListItem key={item.text} disablePadding sx={{ display: "flex", justifyContent: "space-between" }}>
+            <ListItemButton sx={{ textAlign: 'left' }} href={item.url} component={Link}>
+              <ListItemText primary={item.text} />
               <ChevronRightIcon />
             </ListItemButton>
           </ListItem>
@@ -276,8 +280,8 @@ const { logout, authLoading, user } = useAuth();
               <Box sx={{ display: { xs: 'none', md: 'block' }, alignSelf: "center", gap: 2, }}>
 
                 {navItems.map((item) => (
-                  <Button key={item} sx={{ color: 'text.secondary', textTransform: "none" }} >
-                    {item}
+                  <Button key={item.text} sx={{ color: 'text.secondary', textTransform: "none" }} component={Link} href={item.url}>
+                    {item.text}
                   </Button>
                 ))}
               </Box>
