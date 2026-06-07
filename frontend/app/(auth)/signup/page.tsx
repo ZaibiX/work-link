@@ -6,6 +6,7 @@ import { AuthWrapper } from "@/components/authWrapper/AuthWrapper"; // adjust pa
 // import axiosInstance from "@/utils/axiosInstance";
 import useAuth from "@/utils/store/authStore";
 import EmailVerification from "@/components/emailVerification/emailVerification"; 
+import {useRouter} from "next/navigation";
 
 
 // async function handleGoogleSignup() {
@@ -38,8 +39,8 @@ import EmailVerification from "@/components/emailVerification/emailVerification"
 // }
 
 export default function SignupPage() {
-const { registerLocal, loginGoogle, authLoading, verifyEmail } = useAuth();
-
+const { registerLocal, loginGoogle, authLoading, verifyEmail, user } = useAuth();
+const router = useRouter();
   const [formData, setFormData] = useState({ name: "",
     email: "",
     password: "",
@@ -72,6 +73,13 @@ const { registerLocal, loginGoogle, authLoading, verifyEmail } = useAuth();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  // if already loggedIn
+
+  if(!authLoading && user){
+    router.back();
+    return;
   }
   if(authLoading){
     return <Typography variant="h6" align="center" sx={{ mt: 4 }}>Loading...</Typography>;

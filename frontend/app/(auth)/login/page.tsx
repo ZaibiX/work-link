@@ -4,19 +4,28 @@ import { TextField, Button, Box, Link as MuiLink, Stack, Typography} from "@mui/
 import Link from "next/link";
 import { AuthWrapper } from "@/components/authWrapper/AuthWrapper"; // adjust path
 import useAuth from "@/utils/store/authStore";
-
+import {useRouter} from "next/navigation";
 
 export default function LoginPage() {
 
+  const router = useRouter();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const {loginLocal, loginGoogle, authLoading} = useAuth();
+  const {loginLocal, loginGoogle, authLoading, user} = useAuth();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  // if already loggedIn
+
+  if(!authLoading && user){
+    router.back();
+    return;
   }
   return (
     <AuthWrapper 

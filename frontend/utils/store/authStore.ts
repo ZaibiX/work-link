@@ -1,117 +1,146 @@
-import {create} from "zustand";
+import { create } from "zustand";
 import axiosInstance from "../axiosInstance";
+// import { error } from "console";
+
+// import useRouter from "next/navigation";
 
 interface AuthState {
     isLoggedIn: boolean;
     authLoading: boolean;
-    user: {id: string, email:string, role:string} | null;
-    checkAuth: () => Promise<void>;
-    logout: () => Promise<void>;
-    loginLocal: (email: string, password: string) => Promise<void>;
-    loginGoogle: () => Promise<void>;
+    user: { id: string, email: string, role: string } | null;
+    checkAuth: () => Promise<any>;
+    logout: () => Promise<any>;
+    loginLocal: (email: string, password: string) => Promise<any>;
+    loginGoogle: () => Promise<any>;
     registerLocal: (name: string, email: string, password: string) => Promise<any>;
-    verifyEmail: (email: string, passcode: string) => Promise<void>;
+    verifyEmail: (email: string, passcode: string) => Promise<any>;
 }
 
-const useAuth = create<AuthState>((set, get)=>({
+const useAuth = create<AuthState>((set, get) => ({
     isLoggedIn: false,
-    authLoading:false,   
-    user:null,
+    authLoading: false,
+    user: null,
 
     checkAuth: async () => {
         set({ authLoading: true }); // Start loading
-        try{
+        try {
             const response = await axiosInstance.get("/auth/check-auth");
-            set({isLoggedIn: response.data.isAuthenticated, user: response.data.user || null, authLoading: false});
+            set({ isLoggedIn: response.data.isAuthenticated, user: response.data.user || null, authLoading: false });
 
             // ✅ This gets the latest state from the store
-        console.log(get().isLoggedIn, get().user);
+            console.log(get().isLoggedIn, get().user);
+            return response;
         }
-        catch(error:any){
-            console.error("Error checking auth:", error.response?.data?.message|| error.message);
-            set({isLoggedIn: false, user: null, authLoading: false});
+        catch (error: any) {
+            console.error("Error checking auth:", error.response?.data?.message || error.message);
+            set({ isLoggedIn: false, user: null, authLoading: false });
+
+            return error;
         }
     },
     logout: async () => {
         set({ authLoading: true }); // Start loading
-        try{
-            await axiosInstance.delete("/auth/logout/local");
-            set({isLoggedIn: false, user: null, authLoading: false});
+        try {
+            const response = await axiosInstance.delete("/auth/logout/local");
+            set({ isLoggedIn: false, user: null, authLoading: false });
+            return response;
         }
-        catch(error){
-            console.error("Error during logout:", error);
-            set({authLoading: false,});
+        catch (error: any) {
+            console.error("Error during logout:", error.response?.data?.message || error.message);
+            set({ authLoading: false, });
+            return error;
         }
     },
-    
+
     loginLocal: async (email: string, password: string) => {
+        const { authLoading, user } = get();
+
+        if (!authLoading && user) {
+
+        }
         set({ authLoading: true }); // Start loading
-        try{
+        try {
             const response = await axiosInstance.post("/auth/login/local", { email, password });
-            if(response.status === 200){
-                set({isLoggedIn: true, user: response.data.user || null});
+            if (response.status === 200) {
+                set({ isLoggedIn: true, user: response.data.user || null });
             }
+            set({ authLoading: false }); // End loading
+
+            return response;
         }
-        catch(error){
-            console.error("Error during login:", error);
-            set({isLoggedIn: false, user: null});
+        catch (error: any) {
+            console.error("Error during login:", error.response?.data?.message || error.message);
+            set({ isLoggedIn: false, user: null });
+            set({ authLoading: false }); // End loading
+
+            return error;
+
         }
-        set({ authLoading: false }); // End loading
     },
 
     loginGoogle: async () => {
         set({ authLoading: true }); // Start loading
-        try{
+        try {
             const response = await axiosInstance.get("/auth/login/google");
-            if(response.status === 200){
-                set({isLoggedIn: true, user: response.data.user || null, });
+            if (response.status === 200) {
+                set({ isLoggedIn: true, user: response.data.user || null, });
             }
+            set({ authLoading: false }); // End loading
+
+            return response;
         }
-        catch(error){
-            console.error("Error during Google login:", error);
-            set({isLoggedIn: false, user: null});
+        catch (error: any) {
+            console.error("Error during Google login:", error.response?.data?.message || error.message);
+            set({ isLoggedIn: false, user: null });
+            set({ authLoading: false }); // End loading
+
+            return error;
+
         }
-        set({ authLoading: false }); // End loading
     },
 
     registerLocal: async (name: string, email: string, password: string) => {
         set({ authLoading: true }); // Start loading
-        try{
+        try {
             const response = await axiosInstance.post("/auth/register/local", { name, email, password });
-                set({isLoggedIn: response.data.isAuthenticated, user: response.data.user || null});
+            set({ isLoggedIn: response.data.isAuthenticated, user: response.data.user || null });
 
-        set({ authLoading: false }); // End loading
+            set({ authLoading: false }); // End loading
 
             // console.log("response from store after register: ",response)
 
             return response;
         }
-        catch(error){
+        catch (error:any) {
             console.error("Error during registration:", error);
-            set({isLoggedIn: false, user: null, });
-          set({ authLoading: false }); // End loading
+            set({ isLoggedIn: false, user: null, });
+            set({ authLoading: false }); // End loading
+            console.log(error.response?.data?.message || error.message)
+            return error;
 
-         
 
-            throw error;
+            // throw error;
         }
     },
 
     verifyEmail: async function (email, verificationCode) {
         set({ authLoading: true }); // Start loading
-        try{
+        try {
             const response = await axiosInstance.post("/auth/verify-email", { email, verificationCode });
             console.log("response after verifying email", response.data)
-            if(response.status === 200){
-                set({isLoggedIn: true, user: response.data.user || null, });
+            if (response.status === 200) {
+                set({ isLoggedIn: true, user: response.data.user || null, });
             }
         }
-        catch(error:any){
+        catch (error: any) {
             console.error("Error during email verification:", error.response?.data?.message || error.message);
 
-            set({isLoggedIn: false, user: null});
+            set({ isLoggedIn: false, user: null });
+            set({ authLoading: false }); // End loading
+            console.log(error.response?.data?.message || error.message)
+
+            return error;
         }
-        set({ authLoading: false }); // End loading
     }
 
 }));
