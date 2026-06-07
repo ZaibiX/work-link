@@ -3,41 +3,42 @@ import {useState} from "react";
 import { TextField, Button, Box, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { AuthWrapper } from "@/components/authWrapper/AuthWrapper"; // adjust path
-import axiosInstance from "@/utils/axiosInstance";
+// import axiosInstance from "@/utils/axiosInstance";
 import useAuth from "@/utils/store/authStore";
+import EmailVerification from "@/components/emailVerification/emailVerification"; 
 
 
-async function handleGoogleSignup() {
-  try {
-    const response = await axiosInstance.get("/auth/google");
-    // Handle the response as needed
-    console.log(response.data);
-  } catch (error) {
-    console.error("Error during Google signup:", error);
-  }
-}
+// async function handleGoogleSignup() {
+//   try {
+//     const response = await axiosInstance.get("/auth/google");
+//     // Handle the response as needed
+//     console.log(response.data);
+//   } catch (error) {
+//     console.error("Error during Google signup:", error);
+//   }
+// }
 
-async function handleLocalSignup(formData: { name: string; email: string; password: string; confirmPassword: string }) {
-  try {
-    if(formData.password !== formData.confirmPassword){
-      console.error("Passwords do not match");
-      return;
-    }
-    const response = await axiosInstance.post("/auth/register/local", {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      confirmPassword: formData.confirmPassword,
-    });
-    // Handle the response as needed
-    console.log(response.data);
-  } catch (error) {
-    console.error("Error during local signup:", error);
-  }
-}
+// async function handleLocalSignup(formData: { name: string; email: string; password: string; confirmPassword: string }) {
+//   try {
+//     if(formData.password !== formData.confirmPassword){
+//       console.error("Passwords do not match");
+//       return;
+//     }
+//     const response = await axiosInstance.post("/auth/register/local", {
+//       name: formData.name,
+//       email: formData.email,
+//       password: formData.password,
+//       confirmPassword: formData.confirmPassword,
+//     });
+//     // Handle the response as needed
+//     console.log(response.data);
+//   } catch (error) {
+//     console.error("Error during local signup:", error);
+//   }
+// }
 
 export default function SignupPage() {
-const { registerLocal, loginGoogle } = useAuth();
+const { registerLocal, loginGoogle, authLoading, verifyEmail } = useAuth();
 
   const [formData, setFormData] = useState({ name: "",
     email: "",
@@ -46,18 +47,37 @@ const { registerLocal, loginGoogle } = useAuth();
   });
 
   const [error, setError] = useState("");
+  const [showVerification, setShowVerification] = useState(false);
+  
 
-  function handleRegisterLocal(){
+  async function handleRegisterLocal(){
     if(formData.password !== formData.confirmPassword){
       // console.error("Passwords do not match");
       setError("Passwords do not match");
       return;
     }
-    registerLocal(formData.name, formData.email, formData.password);
+    try{
+      const res = await registerLocal(formData.name, formData.email, formData.password);
+      console.log("Registration response:", res.data.emailSent);
+      if(res.data.emailSent){
+       setShowVerification(true);
+      return;
+      }
+    }
+    catch(error:any){
+      setError("Registration failed. Please try again.");
+      console.error("Error during local signup:", error.response?.data?.message || error);
+    }
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+  if(authLoading){
+    return <Typography variant="h6" align="center" sx={{ mt: 4 }}>Loading...</Typography>;
+  }
+  if(showVerification){
+    return <EmailVerification email={formData.email} onVerify={verifyEmail} />
   }
   return (
     <AuthWrapper 

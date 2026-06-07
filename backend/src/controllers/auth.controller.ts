@@ -3,9 +3,12 @@ import {prisma} from "../utils/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import mailer from "../config/mailer.js";
+import { log } from "node:console";
 
 export async function registerLocal(req: Request, res: Response)
 {
+    console.log("hello from register local");
+    
     try{
         const {name, email, password} = req.body;
 
@@ -60,7 +63,7 @@ export async function registerLocal(req: Request, res: Response)
             return res.status(500).json({ message: "Error sending verification email" });
         }
 
-        return res.status(200).json({ message: "Please check your email for the verification code." });
+        return res.status(200).json({ message: "Please check your email for the verification code.", emailSent: true });
         
 
     }
@@ -72,12 +75,14 @@ export async function registerLocal(req: Request, res: Response)
 
 export async function verifyEmail(req: Request, res: Response)
 {
+    // console.log("verifying email...")
     const { email, verificationCode } = req.body;
     try{
         const newUser = await prisma.user.findUnique({
             where: { email },
         });
 
+        // console.log("New user from auth controller: ", newUser, verificationCode);
         if(!newUser){
             return res.status(400).json({ message: "Invalid email or verification code" });
         }

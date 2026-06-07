@@ -9,7 +9,8 @@ interface AuthState {
     logout: () => Promise<void>;
     loginLocal: (email: string, password: string) => Promise<void>;
     loginGoogle: () => Promise<void>;
-    registerLocal: (name: string, email: string, password: string) => Promise<void>;
+    registerLocal: (name: string, email: string, password: string) => Promise<any>;
+    verifyEmail: (email: string, passcode: string) => Promise<void>;
 }
 
 const useAuth = create<AuthState>((set, get)=>({
@@ -79,16 +80,39 @@ const useAuth = create<AuthState>((set, get)=>({
             const response = await axiosInstance.post("/auth/register/local", { name, email, password });
                 set({isLoggedIn: response.data.isAuthenticated, user: response.data.user || null});
 
-            // return response;
+        set({ authLoading: false }); // End loading
+
+            // console.log("response from store after register: ",response)
+
+            return response;
         }
         catch(error){
             console.error("Error during registration:", error);
             set({isLoggedIn: false, user: null, });
+          set({ authLoading: false }); // End loading
+
+         
 
             throw error;
         }
-        set({ authLoading: false }); // End loading
     },
+
+    verifyEmail: async function (email, verificationCode) {
+        set({ authLoading: true }); // Start loading
+        try{
+            const response = await axiosInstance.post("/auth/verify-email", { email, verificationCode });
+            console.log("response after verifying email", response.data)
+            if(response.status === 200){
+                set({isLoggedIn: true, user: response.data.user || null, });
+            }
+        }
+        catch(error:any){
+            console.error("Error during email verification:", error.response?.data?.message || error.message);
+
+            set({isLoggedIn: false, user: null});
+        }
+        set({ authLoading: false }); // End loading
+    }
 
 }));
 
