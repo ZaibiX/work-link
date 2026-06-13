@@ -148,7 +148,7 @@ const { logout, authLoading, user } = useAuth();
       <List sx={{ mt: "auto", width: "100%", p: 2,}}>
         {navItems.map((item) => (
           <ListItem key={item.text} disablePadding sx={{ display: "flex", justifyContent: "space-between" }}>
-            <ListItemButton sx={{ textAlign: 'left' }} href={item.url} component={Link}>
+            <ListItemButton sx={{ textAlign: 'left' }} href={item.url} component={Link} onClick={()=>{setMobileOpen(false)}}>
               <ListItemText primary={item.text} />
               <ChevronRightIcon />
             </ListItemButton>
