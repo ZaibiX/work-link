@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axiosInstance from "../axiosInstance";
+import axiosInstance from "../utils/axiosInstance";
 // import { error } from "console";
 
 // import useRouter from "next/navigation";
@@ -18,7 +18,7 @@ interface AuthState {
 
 const useAuth = create<AuthState>((set, get) => ({
     isLoggedIn: false,
-    authLoading: false,
+    authLoading: true,
     user: null,
 
     checkAuth: async () => {

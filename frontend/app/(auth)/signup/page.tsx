@@ -1,12 +1,13 @@
 "use client";
-import {useState} from "react";
+import { useState, useEffect } from "react";
 import { TextField, Button, Box, Link as MuiLink, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { AuthWrapper } from "@/components/authWrapper/AuthWrapper"; // adjust path
 // import axiosInstance from "@/utils/axiosInstance";
-import useAuth from "@/utils/store/authStore";
-import EmailVerification from "@/components/emailVerification/emailVerification"; 
-import {useRouter} from "next/navigation";
+import useAuth from "@/lib/store/authStore";
+import EmailVerification from "@/components/emailVerification/emailVerification";
+import { useRouter } from "next/navigation";
+import GlobalLoading from "@/components/loading/Loading";
 
 
 // async function handleGoogleSignup() {
@@ -39,33 +40,50 @@ import {useRouter} from "next/navigation";
 // }
 
 export default function SignupPage() {
-const { registerLocal, loginGoogle, authLoading, verifyEmail, user } = useAuth();
-const router = useRouter();
-  const [formData, setFormData] = useState({ name: "",
+  const { registerLocal, loginGoogle, authLoading, verifyEmail, user } = useAuth();
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showVerification, setShowVerification] = useState(false);
-  
 
-  async function handleRegisterLocal(){
-    if(formData.password !== formData.confirmPassword){
+  useEffect(() => {
+
+  // if already loggedIn
+
+    if (!authLoading && user) {
+      setLoading(true);
+      router.back();
+      return;
+    }
+    
+    setLoading(authLoading);
+
+  }, [authLoading, user, router]);
+
+  async function handleRegisterLocal() {
+    if (formData.password !== formData.confirmPassword) {
       // console.error("Passwords do not match");
       setError("Passwords do not match");
       return;
     }
-    try{
+    try {
       const res = await registerLocal(formData.name, formData.email, formData.password);
       console.log("Registration response:", res.data.emailSent);
-      if(res.data.emailSent){
-       setShowVerification(true);
-      return;
+      // Axios responses might wrap the data payload. Ensure res.data exists
+      if (res?.data?.emailSent) {
+        setShowVerification(true);
+      } else {
+        setError("Registration succeeded but no verification email was sent.");
       }
     }
-    catch(error:any){
+    catch (error: any) {
       setError("Registration failed. Please try again.");
       console.error("Error during local signup:", error.response?.data?.message || error);
     }
@@ -75,24 +93,21 @@ const router = useRouter();
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  // if already loggedIn
 
-  if(!authLoading && user){
-    router.back();
-    return;
+
+  if (loading) {
+    return <GlobalLoading />
   }
-  if(authLoading){
-    return <Typography variant="h6" align="center" sx={{ mt: 4 }}>Loading...</Typography>;
-  }
-  if(showVerification){
+  if (showVerification) {
     return <EmailVerification email={formData.email} onVerify={verifyEmail} />
   }
   return (
-    <AuthWrapper 
-      title="Create your account" 
+    <AuthWrapper
+      title="Create your account"
       subtitle="Get started and connect with experts"
-      onGoogleClick={() => {console.log("Google Signup")
-      loginGoogle();
+      onGoogleClick={() => {
+        console.log("Google Signup")
+        loginGoogle();
       }}
     >
       <Box component="form" noValidate>
@@ -101,19 +116,20 @@ const router = useRouter();
           <TextField fullWidth label="Email Address" variant="outlined" type="email" name="email" onChange={handleChange} value={formData.email} />
           <TextField fullWidth label="Password" variant="outlined" type="password" name="password" onChange={handleChange} value={formData.password} />
           <TextField fullWidth label="Re-enter Password" variant="outlined" type="password" name="confirmPassword" onChange={handleChange} value={formData.confirmPassword} />
-          
+
           <Typography variant="body2" color="error">
             {error}
           </Typography>
-          <Button 
-            fullWidth 
-            variant="contained" 
-            size="large" 
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
             sx={{ py: 1.5, borderRadius: 2, fontWeight: 700 }}
             onClick={handleRegisterLocal}
           >
             Sign Up
           </Button>
+          
 
           <Typography variant="body2">
             Already have an account?{" "}

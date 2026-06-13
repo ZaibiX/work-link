@@ -32,8 +32,8 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Link from 'next/link';
-import axiosInstance from '@/utils/axiosInstance';
-import useAuth from '@/utils/store/authStore';
+import axiosInstance from '@/lib/utils/axiosInstance';
+import useAuth from '@/lib/store/authStore';
 
 
 async function handleLogout() {

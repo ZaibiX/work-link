@@ -10,7 +10,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import axiosInstance from "@/utils/axiosInstance";
+import axiosInstance from "@/lib/utils/axiosInstance";
 
 const SKILL_CATEGORIES = ["AC_TECHNICIAN", "ELECTRICIAN", "PLUMBER", "SOLAR_EXPERT", "PAINTER", "CARPENTER", "OTHER"];
 

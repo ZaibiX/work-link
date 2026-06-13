@@ -1,10 +1,11 @@
 "use client";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import { TextField, Button, Box, Link as MuiLink, Stack, Typography} from "@mui/material";
 import Link from "next/link";
 import { AuthWrapper } from "@/components/authWrapper/AuthWrapper"; // adjust path
-import useAuth from "@/utils/store/authStore";
-import {useRouter} from "next/navigation";
+import useAuth from "@/lib/store/authStore";
+import {useRouter, useSearchParams} from "next/navigation";
+import GlobalLoading from "@/components/loading/Loading";
 
 export default function LoginPage() {
 
@@ -14,19 +15,31 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(true);
 
   const {loginLocal, loginGoogle, authLoading, user} = useAuth();
+  const searchParams = useSearchParams();
+
+  useEffect(()=>{
+
+    setLoading(authLoading);
+  // if already loggedIn
+    const destination = searchParams.get("callbackUrl") || "/"
+    if(!authLoading && user){
+    router.push(destination);
+    return;
+  }
+
+  },[authLoading,user, router])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  // if already loggedIn
-
-  if(!authLoading && user){
-    router.back();
-    return;
+   if (authLoading || user) {
+    return <GlobalLoading />
   }
+  
   return (
     <AuthWrapper 
       title="Welcome Back" 

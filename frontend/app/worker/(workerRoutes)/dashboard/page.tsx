@@ -12,8 +12,8 @@ import AddIcon from '@mui/icons-material/Add';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import Link from "next/link";
-import axiosInstance from "@/utils/axiosInstance"
-import useAuth from "@/utils/store/authStore";
+import axiosInstance from "@/lib/utils/axiosInstance"
+import useAuth from "@/lib/store/authStore";
 import { useRouter } from "next/navigation";
 
 const MOCK_WORKER = {

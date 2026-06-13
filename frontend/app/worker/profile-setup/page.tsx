@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { 
-  Container, Paper, Typography, Box, TextField, MenuItem, 
-  Grid, Button, Stack, Divider, Checkbox, FormControlLabel 
+import { useState, useEffect } from "react";
+import {
+  Container, Paper, Typography, Box, TextField, MenuItem,
+  Grid, Button, Stack, Divider, Checkbox, FormControlLabel
 } from "@mui/material";
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import axiosInstance from "@/utils/axiosInstance";
-
+import axiosInstance from "@/lib/utils/axiosInstance";
+import useAuth from "@/lib/store/authStore";
+import Loading from "@/components/loading/Loading";
+import { useRouter } from "next/navigation";
+import {useAuthRedirect} from "@/lib/hooks/useAuthRedirect";
 
 // Enums based on your Prisma Schema
 const SKILL_CATEGORIES = ["AC_TECHNICIAN", "ELECTRICIAN", "SOLAR_EXPERT", "PLUMBER", "CARPENTER", "OTHER"];
@@ -23,13 +26,28 @@ export default function CreateWorkerProfile() {
   const [city, setCity] = useState("Lahore");
   const [agreed, setAgreed] = useState(false);
   const [country, setCountry] = useState("Pakistan"); // Defaulted to Pakistan as per marketplace scope
+  const { authLoading, user } = useAuth();
+  const [loading, setloading] = useState(true);
 
   // State for errors
   const [errors, setErrors] = useState<any>({});
 
+  const router = useRouter();
+  useAuthRedirect(authLoading, user, ["CLIENT", "WORKER"])
+  // useEffect(() => {
+
+  //   if ((!authLoading && !user)|| (!authLoading && user?.role!=="WORKER")) {
+  //     console.log(user, authLoading)
+  //     router.replace("/login");
+  //     return;
+  //   }
+  //   setloading(authLoading);
+
+  // }, [router, user, authLoading])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation logic only on submit
     let newErrors: any = {};
     if (!skillCategory) newErrors.skillCategory = "Skill Category is required";
@@ -44,7 +62,7 @@ export default function CreateWorkerProfile() {
       console.log("Submitting Data:", { skillCategory, experienceYears, phone, cnic, city, agreed });
       // Proceed with your submission logic
 
-      try{
+      try {
         const response = await axiosInstance.post("/worker/profile", {
           skillCategory,
           experienceYears: Number(experienceYears),
@@ -54,22 +72,27 @@ export default function CreateWorkerProfile() {
           country,
           agreed
         });
-      } catch (error:any) {
-        console.error("Error submitting worker profile:", error.response?.data?.message|| error.message);
+      } catch (error: any) {
+        console.error("Error submitting worker profile:", error.response?.data?.message || error.message);
 
       }
     }
   };
 
+  if (authLoading || !user) {
+    return <Loading />
+
+  }
+
   return (
-    <Container maxWidth="md" sx={{ py: {xs:2,md:4} }}>
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          p: { xs: 3, md: 6 }, 
-          borderRadius: 4, 
-          border: '1px solid', 
-          borderColor: 'divider' 
+    <Container maxWidth="md" sx={{ py: { xs: 2, md: 4 } }}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 3, md: 6 },
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: 'divider'
         }}
       >
         {/* Header */}
@@ -83,10 +106,10 @@ export default function CreateWorkerProfile() {
         </Box>
 
         <Box component="form" noValidate onSubmit={handleSubmit}>
-          <Grid container sx={{gap:{xs:2, md:4}}}>
-            
+          <Grid container sx={{ gap: { xs: 2, md: 4 } }}>
+
             {/* 1. Professional Identity */}
-            <Grid sx={{width:"100%"}}>
+            <Grid sx={{ width: "100%" }}>
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
                 <BusinessCenterIcon color="primary" />
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>Professional Details</Typography>
@@ -129,7 +152,7 @@ export default function CreateWorkerProfile() {
             <Grid ><Divider /></Grid>
 
             {/* 2. Personal & Legal Information */}
-            <Grid sx={{width:"100%"}} >
+            <Grid sx={{ width: "100%" }} >
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
                 <AssignmentIndIcon color="primary" />
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>Verification & Contact</Typography>
@@ -168,12 +191,12 @@ export default function CreateWorkerProfile() {
             <Grid ><Divider /></Grid>
 
             {/* 3. Location */}
-            <Grid sx={{width:"100%"}} >
+            <Grid sx={{ width: "100%" }} >
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
                 <LocationOnIcon color="primary" />
                 <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>Service Location</Typography>
               </Stack>
-              
+
               <Grid container spacing={2}>
                 <Grid >
                   <TextField
@@ -207,10 +230,10 @@ export default function CreateWorkerProfile() {
             <Grid sx={{ mt: 2 }}>
               <FormControlLabel
                 control={
-                  <Checkbox 
-                    checked={agreed} 
-                    onChange={(e) => setAgreed(e.target.checked)} 
-                    size="small" 
+                  <Checkbox
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    size="small"
                   />
                 }
                 label={
@@ -219,18 +242,19 @@ export default function CreateWorkerProfile() {
                   </Typography>
                 }
               />
-              <Button 
+              <Button
                 type="submit"
-                variant="contained" 
-                fullWidth 
-                size="large"
-                sx={{ 
-                  mt: 4, 
-                  py: 1.8, 
-                  borderRadius: 3, 
-                  fontWeight: 800, 
+                variant="contained"
+                
+                size="small"
+                sx={{
+                  mt: 4,
+                  py: 1.4,
+                  borderRadius: 3,
+                  fontWeight: 800,
                   fontSize: '1rem',
-                  textTransform: 'none'
+                  textTransform: 'none',
+                  width:{xs:"100%", md:"auto"}
                 }}
               >
                 Complete My Profile

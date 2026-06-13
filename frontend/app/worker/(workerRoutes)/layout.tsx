@@ -2,7 +2,7 @@
 
 import {useEffect} from "react";
 import { useRouter } from "next/navigation";
-import useAuth from "@/utils/store/authStore";
+import useAuth from "@/lib/store/authStore";
 
 export default function WorkerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();

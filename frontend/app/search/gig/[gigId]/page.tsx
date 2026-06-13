@@ -10,7 +10,7 @@ import {
   CheckCircle, VerifiedUser, Star
 } from '@mui/icons-material';
 import { useRouter, useParams } from 'next/navigation';
-import axiosInstance from "@/utils/axiosInstance";
+import axiosInstance from "@/lib/utils/axiosInstance";
 
 
 const dummyGig:GigDetail = {

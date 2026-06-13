@@ -174,7 +174,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import FilterSection from "@/components/gigs/FilterSection";
 import GigsList from "@/components/gigs/Gigs";
 import GigsSkeleton from "@/components/gigs/GigsSkeleton";
-import axiosInstance from "@/utils/axiosInstance";
+import axiosInstance from "@/lib/utils/axiosInstance";
 
 
 
