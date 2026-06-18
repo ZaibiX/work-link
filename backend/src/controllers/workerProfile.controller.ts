@@ -102,6 +102,7 @@ export async function getWorkerProfile(req: Request, res: Response) {
   }
   // Implementation for getting worker profile
   try {
+    // console.log("Get worker profile hit")
     // const param: string = String(req.params.workerId) ?? "";
     // const queryUserId: string = req.query.userId ? String(req.query.userId) : "";
     const lookupKey: string = (req.user as any)?.id;
@@ -112,7 +113,7 @@ export async function getWorkerProfile(req: Request, res: Response) {
 
     // Try find by worker profile id first
     let profile = await prisma.workerProfile.findUnique({
-      where: { id: lookupKey },
+      where: { userId: lookupKey },
       select: {
         gigs: {select:{
           id:true,
@@ -141,13 +142,13 @@ export async function getWorkerProfile(req: Request, res: Response) {
     // }
 
     if (!profile) {
-      return res.status(404).json({ error: "Worker profile not found." });
+      return res.status(404).json({ message: "Worker profile not found." });
     }
 
     return res.status(200).json({ profile });
   } catch (err) {
     console.error("getWorkerProfile error:", err);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 

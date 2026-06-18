@@ -213,7 +213,7 @@ export const handleGoogleCallback = (req: Request, res: Response) => {
         //.redirect("http://localhost:3000/dashboard"); // Redirect to your Worklink frontend
 };
 
-export function checkAuth(req: Request, res: Response)
+export async function checkAuth(req: Request, res: Response)
 {
     const token = req.cookies.jwt;
     if (!token) {
@@ -226,8 +226,24 @@ export function checkAuth(req: Request, res: Response)
     }
 
     try{
-        const decoded= jwt.verify(token, process.env.JWT_SECRET!) as { email: string, id: number, role: string };
-        return res.status(200).json({ message: "Authenticated", user: decoded, isAuthenticated: true, });
+        const decoded= jwt.verify(token, process.env.JWT_SECRET!) as { email: string, id: string, role: string };
+        const user = await prisma.user.findUnique({
+            where:{id:decoded.id},
+            select:{
+                id:true,
+                email:true,
+                role:true,
+            }
+        })
+        if(!user){
+            return res.status(400).json({ message: "Invalid user" });
+        }
+        // creating jwt token
+        const payload = { email: user.email, id: user.id, role: user.role };
+        const options = { expiresIn: "1h" } as const;
+
+        const newToken = jwt.sign(payload, process.env.JWT_SECRET!, options);
+         return res.status(200).cookie("jwt",newToken, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax",maxAge:1000*60*60 }).json({ message: "Authenticated", user: user, isAuthenticated: true, });
     }
     catch(error){
         console.error("Error verifying token:", error);

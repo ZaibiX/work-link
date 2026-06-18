@@ -15,6 +15,7 @@ import Link from "next/link";
 import axiosInstance from "@/lib/utils/axiosInstance"
 import useAuth from "@/lib/store/authStore";
 import { useRouter } from "next/navigation";
+import {useAuthRedirect} from "@/lib/hooks/useAuthRedirect"
 
 const MOCK_WORKER = {
     id: "worker-123",
@@ -47,6 +48,7 @@ export default function ProfileManagement() {
 
     // const isLimitReached = gigs.length >= 3;
     const isLimitReached = false;
+    useAuthRedirect(authLoading, user, ["WORKER"]);
 
     async function handleDeleteGig(gigId: string){
         try{
@@ -94,14 +96,14 @@ export default function ProfileManagement() {
     useEffect(() => {
 
 
-        if(user?.role !== "WORKER"){
-            // console.log(user);
-            router.push("/worker/profile-setup");
-            return;
-        }
+        // if(user?.role !== "WORKER"){
+        //     // console.log(user);
+        //     router.push("/worker/profile-setup");
+        //     return;
+        // }
         async function fetchProfileDetails() {
             try {
-                const response = await axiosInstance.get(`worker/profile`);
+                const response = await axiosInstance.get(`/worker/profile`);
 
                 console.log("Data from response: ", response.data)
 
@@ -116,7 +118,7 @@ export default function ProfileManagement() {
                 setProfile(prof);
                 setGigs(response.data.profile.gigs);
             } catch (err: any) {
-                console.error(err.response?.data?.message || err.message);
+                console.log(err.response?.data?.message || err.message);
             }
         }
         

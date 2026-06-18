@@ -261,7 +261,7 @@ const { logout, authLoading, user } = useAuth();
 />
 
             </div> */}
-              <div style={{ position: 'relative', width: '140px', height: '60px' }}>
+              <Link style={{ position: 'relative', width: '140px', height: '60px' }} href="/" >
                 <Image
                   src="/wl.png"
                   alt="WorkLink Logo"
@@ -274,7 +274,7 @@ const { logout, authLoading, user } = useAuth();
                   }}
                   priority // Loads the logo immediately (important for LCP)
                 />
-              </div>
+              </Link>
 
               {/* Navigation buttons for desktop */}
               <Box sx={{ display: { xs: 'none', md: 'block' }, alignSelf: "center", gap: 2, }}>

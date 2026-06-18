@@ -26,14 +26,14 @@ export default function CreateWorkerProfile() {
   const [city, setCity] = useState("Lahore");
   const [agreed, setAgreed] = useState(false);
   const [country, setCountry] = useState("Pakistan"); // Defaulted to Pakistan as per marketplace scope
-  const { authLoading, user } = useAuth();
+  const { authLoading, user, checkAuth } = useAuth();
   const [loading, setloading] = useState(true);
 
   // State for errors
   const [errors, setErrors] = useState<any>({});
 
   const router = useRouter();
-  useAuthRedirect(authLoading, user, ["CLIENT", "WORKER"])
+  useAuthRedirect(authLoading, user, ["CLIENT",])
   // useEffect(() => {
 
   //   if ((!authLoading && !user)|| (!authLoading && user?.role!=="WORKER")) {
@@ -44,6 +44,16 @@ export default function CreateWorkerProfile() {
   //   setloading(authLoading);
 
   // }, [router, user, authLoading])
+
+  useEffect(()=>{
+    async function checkAuthOnReload(){
+      console.log("Checking auth in useEffect in worker profile-setup")
+      await checkAuth()
+
+    }
+
+    checkAuthOnReload();
+  },[checkAuth])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +82,10 @@ export default function CreateWorkerProfile() {
           country,
           agreed
         });
+
+        await checkAuth();
+
+
       } catch (error: any) {
         console.error("Error submitting worker profile:", error.response?.data?.message || error.message);
 

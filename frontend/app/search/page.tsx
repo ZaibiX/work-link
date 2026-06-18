@@ -124,7 +124,7 @@ export default function SearchPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 900 }}>Search Opportunities</Typography>
+        <Typography variant="h4" sx={{ fontWeight: 900 }}>Search Services</Typography>
         <Typography variant="body2" color="text.secondary">
           Showing results for "{searchParams.get('q') || 'All Services'}" in {searchParams.get('location') || 'Lahore'}
         </Typography>
