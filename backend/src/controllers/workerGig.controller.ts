@@ -18,7 +18,7 @@ interface AuthenticatedRequest extends Request {
 // GET /worker/gigs
 // Returns all gigs belonging to the authenticated worker
 // ---------------------------------------------------------------------------
-export async function getWorkerGigs(req: Request, res: Response) {
+export async function getWorkerGigs(req: Request, res: Response) { //not used
   try {
     // const { id: userId } = (req as AuthenticatedRequest).user;
     const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
@@ -52,12 +52,17 @@ export async function getWorkerGigById(req: Request, res: Response) {
     const { gigId } = req.params as { gigId: string };
     // const {workerId} = req.body;
     //example id
-    const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    // const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    const authReq = req as AuthenticatedRequest;
 
-    const gig = await prisma.gig.findFirst({
+    const userId = authReq.user?.id;
+
+    const gig = await prisma.gig.findUnique({
       where: {
         id: gigId,
-        workerId: workerId,   // ownership check in the same query
+        worker:{
+          userId:userId
+        } ,   // ownership check in the same query
         isDeleted: false,
       },
       select:{
@@ -97,9 +102,13 @@ export async function createWorkerGig(req: Request, res: Response) {
 
     const { title, description, price, category, city, area, lat, lng , customSkill} = req.body;
     // const workerId: string = String(req.params.workerId);
-    const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    // const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    const authReq = req as AuthenticatedRequest;
 
-    console.log("workerId: ", workerId);
+    const userId = authReq.user?.id;
+
+    
+    // console.log("workerId: ", workerId);
     // Fetch the worker profile id — needed for the relation
     // This is the only extra DB call and it's unavoidable since req.user doesn't carry workerId
     
@@ -124,7 +133,7 @@ export async function createWorkerGig(req: Request, res: Response) {
         lng,
         customSkill,
         // Prisma uses this ID to fill the 'workerId' column in the Gig table
-        worker: { connect: { id: workerId } },
+        worker: { connect: { userId:  userId} },
       },
     });
 
@@ -141,51 +150,66 @@ export async function createWorkerGig(req: Request, res: Response) {
 // ---------------------------------------------------------------------------
 export async function updateWorkerGig(req: Request, res: Response) {
   try {
-    // const { id: userId } = (req as AuthenticatedRequest).user;
     const { gigId } = req.params as { gigId: string };
-    const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    
+    const authReq = req as AuthenticatedRequest;
+    // Grab the logged-in user's ID
+    const userId = authReq.user?.id;
 
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized. Missing active session." });
+    }
 
-    const { title, description, price , category, city, area, lat, lng, isActive, customSkill } = req.body;
+    const { title, description, price, category, city, area, lat, lng, isActive, customSkill } = req.body;
 
-    // updateMany lets us apply the ownership check (worker.userId) and update in one query.
-    // It returns { count } — if count is 0, the gig either doesn't exist or isn't owned by this worker.
-    const gig = await prisma.gig.update({
+    // 2. Fix Issue 2: Check ownership via relation check 'worker: { userId }' using updateMany 
+    // to prevent Prisma from throwing an unhandled exception if the gig doesn't match the user.
+    const updateCount = await prisma.gig.updateMany({
       where: {
         id: gigId,
-        workerId: workerId,
         isDeleted: false,
+        worker: {
+          userId: userId // 👈 Relational jump! Ensures this gig belongs to the logged-in user's worker profile
+        }
       },
       data: {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
-        ...(price !== undefined && { price:Number(price) }),
+        ...(price !== undefined && { price: Number(price) }),
         ...(category !== undefined && { category }),
         ...(city !== undefined && { city }),
         ...(area !== undefined && { area }),
-        ...(lat !== undefined && { lat:Number(lat) }),
-        ...(lng !== undefined && { lng:Number(lng) }),
+        ...(lat !== undefined && { lat: Number(lat) }),
+        ...(lng !== undefined && { lng: Number(lng) }),
         ...(isActive !== undefined && { isActive }),
         ...(customSkill !== undefined && { customSkill }),
-
-      },
-       select:{
-        title:true,
-        price:true,
-        city:true,
-        area:true,
-        category:true,
-        customSkill:true,
-        description:true,
       }
     });
 
-    if (!gig) {
-      return res.status(404).json({ success: false, message: "Gig not found" });
+    // If count is 0, the gig either doesn't exist, is deleted, or doesn't belong to this worker
+    if (updateCount.count === 0) {
+      return res.status(404).json({ success: false, message: "Gig not found or unauthorized to update" });
     }
 
-    return res.status(200).json({ success: true, message: "Gig updated successfully", data:gig });
-  } catch (error) {
+    // Fetch the updated data to return to the client since updateMany doesn't support 'select'
+    const updatedGig = await prisma.gig.findUnique({
+      where: { id: gigId },
+      select: {
+        title: true,
+        price: true,
+        city: true,
+        area: true,
+        category: true,
+        customSkill: true,
+        description: true,
+        isActive: true
+      }
+    });
+
+    return res.status(200).json({ success: true, message: "Gig updated successfully", data: updatedGig });
+
+  } catch (error: any) {
+    console.error("Error inside updateWorkerGig:", error.message || error);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
@@ -195,14 +219,19 @@ export async function updateWorkerGig(req: Request, res: Response) {
 export async function deleteWorkerGig(req: Request, res: Response) {
   try {
     // const { id: userId } = (req as AuthenticatedRequest).user;
-    const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    // const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+     const authReq = req as AuthenticatedRequest;
+    // Grab the logged-in user's ID
+    const userId = authReq.user?.id;
 
     const { gigId } = req.params as { gigId: string };
 
     const { count } = await prisma.gig.deleteMany({
       where: {
         id: gigId,
-        workerId: workerId,
+        worker:{
+          userId
+        } ,
         // isDeleted: false,
       },
     });

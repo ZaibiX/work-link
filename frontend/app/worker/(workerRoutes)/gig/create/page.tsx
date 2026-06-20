@@ -17,7 +17,7 @@ const SKILL_CATEGORIES = ["AC_TECHNICIAN", "ELECTRICIAN", "PLUMBER", "SOLAR_EXPE
 export default function CreateGig() {
   const params = useParams();
   const router = useRouter();
-  const workerId = params.workerId;
+  // const workerId = params.workerId;
   const sampleId = "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
   
 
@@ -63,15 +63,15 @@ export default function CreateGig() {
 
     // If no errors, proceed with submission
     if (Object.keys(newErrors).length === 0) {
-      console.log("Validation passed. Submitting Gig for:", workerId, formData);
+      console.log("Validation passed. Submitting Gig for:", formData);
 
       try{
-        const response = await axiosInstance.post(`worker/gig`, formData);
+        const response = await axiosInstance.post(`/worker/gig`, formData);
       router.push('/worker/dashboard');
 
 
       }catch(err : any){
-        console.error(err.response?.data?.message)
+        console.error(err.response?.data?.message|| err)
       }
     }
   };
@@ -80,7 +80,7 @@ export default function CreateGig() {
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Button 
         component={Link} 
-        href={"/worker/dashboard/"+ workerId } 
+        href={"/worker/dashboard/" } 
         startIcon={<ArrowBackIcon />} 
         sx={{ mb: 3, fontWeight: 700, color: 'text.secondary', textTransform: 'none' }}
       >

@@ -12,10 +12,10 @@ workerRouter.put("/profile/:workerId", passport.authenticate('jwt', { session: f
 workerRouter.post("/profile", passport.authenticate("jwt", { session: false }), protectRoute([]), createWorkerProfile);
 
 // workerRouter.get("/gigs", mockAuth, getWorkerGigs); not yet used
-workerRouter.post("/gig", protectRoute(["worker"]), createWorkerGig);
-workerRouter.put("/gig/:gigId", protectRoute(["worker"]),updateWorkerGig);
-workerRouter.delete("/gig/:gigId",protectRoute(["worker"]) ,deleteWorkerGig);
-workerRouter.get("/gig/:gigId", protectRoute(["worker"]), getWorkerGigById);
+workerRouter.post("/gig", passport.authenticate("jwt", { session: false }), protectRoute(["WORKER"]), createWorkerGig);
+workerRouter.put("/gig/:gigId", passport.authenticate("jwt", { session: false }),  protectRoute(["WORKER"]),updateWorkerGig);
+workerRouter.delete("/gig/:gigId",passport.authenticate("jwt", { session: false }),protectRoute(["WORKER"]) ,deleteWorkerGig);
+workerRouter.get("/gig/:gigId", passport.authenticate("jwt", { session: false }), protectRoute(["WORKER"]), getWorkerGigById);
 
 // workerRouter.get("/manage-profile/:workerId");
 // workerRouter.get("/my-gigs/:workerId");
