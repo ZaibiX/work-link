@@ -15,7 +15,9 @@ import Link from "next/link";
 import axiosInstance from "@/lib/utils/axiosInstance"
 import useAuth from "@/lib/store/authStore";
 import { useRouter } from "next/navigation";
-import {useAuthRedirect} from "@/lib/hooks/useAuthRedirect"
+import { useAuthRedirect } from "@/lib/hooks/useAuthRedirect"
+// import BackdropLoading from "@/components/backdropLoading/BackdropLoading";
+import GlobalLoading from "@/components/loading/Loading";
 
 const MOCK_WORKER = {
     id: "worker-123",
@@ -31,14 +33,39 @@ const MOCK_WORKER = {
     status: "BUSY"
 };
 
+interface WorkerType {
+    id: string;
+    user: {
+        name: string;
+    };
+    phone: string;
+    skillCategory: string;
+    // 👇 FIX: Changed from tuple syntax to standard array of objects syntax
+    gigs: {
+        id: string;
+        title: string;
+        price: number;
+        isActive: boolean;
+    }[];
+    status: string;
+}
+
 const SKILL_CATEGORIES = ["AC_TECHNICIAN", "ELECTRICIAN", "PLUMBER", "SOLAR_EXPERT", "PAINTER", "CARPENTER", "OTHER"];
 
 
 
 export default function ProfileManagement() {
-    const sampleId = "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
-    const [profile, setProfile] = useState(MOCK_WORKER);
-    const [gigs, setGigs] = useState(MOCK_WORKER.gigs);
+    // const sampleId = "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    const [profile, setProfile] = useState<WorkerType>({
+        id: "",
+        user: { name: "" },
+        phone: "",
+        skillCategory: "",
+        gigs: [],
+        status: "AVAILABLE"
+    });
+    const [gigs, setGigs] = useState<WorkerType["gigs"]>([]);
+    // const [backdropOpen, setBackdropOpen] = useState(true);
     const { user, authLoading } = useAuth();
     const router = useRouter();
 
@@ -50,46 +77,47 @@ export default function ProfileManagement() {
     const isLimitReached = false;
     useAuthRedirect(authLoading, user, ["WORKER"]);
 
-    async function handleDeleteGig(gigId: string){
-        try{
+    async function handleDeleteGig(gigId: string) {
+        try {
             const confirmation = window.confirm("Are you sure you want to delete this gig?");
-            if(confirmation){
-            const response = await axiosInstance.delete(`worker/gig/${gigId}`)
+            if (confirmation) {
+                const response = await axiosInstance.delete(`worker/gig/${gigId}`)
 
-            setGigs((prev)=>{
-                return (prev.filter((gig)=>{
-                    if(gig.id!=gigId)
-                        return gig;
+                setGigs((prev) => {
+                    return (prev.filter((gig) => {
+                        if (gig.id != gigId)
+                            return gig;
                     }));
-            });
+                });
 
             }
-        }catch(err:any){
-                console.error(err.response?.data?.message || err.message);
+        } catch (err: any) {
+            console.error(err.response?.data?.message || err.message);
 
         }
     }
 
     async function handleSaveChanges() {
-        
-        try{
+
+        try {
 
             const response = await axiosInstance.put(`/worker/profile/`, profile);
 
             const prof: any = {
-                    id:response.data.profile.id,
-                    user: response.data.profile.user,
-                    skillCategory: response.data.profile.skillCategory,
-                    phone: response.data.profile.phone,
-                    status: response.data.profile.status
-                }
+                id: response.data.profile.id,
+                user: response.data.profile.user,
+                skillCategory: response.data.profile.skillCategory,
+                phone: response.data.profile.phone,
+                status: response.data.profile.status,
+                gigs: response.data.profile.gigs
+            }
 
-                console.log(prof);
-                setProfile(prof);
-                setGigs(response.data.profile.gigs);
+            console.log(prof);
+            setProfile(prof);
+            setGigs(response.data.profile.gigs);
 
-        }catch(err: any){
-            console.error("Error while save changes triggered: ", err.response?.data?.message|| err.message)
+        } catch (err: any) {
+            console.error("Error while save changes triggered: ", err.response?.data?.message || err.message)
         }
     }
 
@@ -112,7 +140,8 @@ export default function ProfileManagement() {
                     user: response.data.profile.user,
                     skillCategory: response.data.profile.skillCategory,
                     phone: response.data.profile.phone,
-                    status: response.data.profile.status
+                    status: response.data.profile.status,
+                    gigs: response.data.profile.gigs
                 }
 
                 setProfile(prof);
@@ -120,27 +149,28 @@ export default function ProfileManagement() {
             } catch (err: any) {
                 console.log(err.response?.data?.message || err.message);
             }
+
+            // finally {
+            //     setBackdropOpen(false);
+            // }
         }
-        
+
 
         fetchProfileDetails();
     }, [])
 
     if(authLoading || !user){
         return (
-            <Container maxWidth="md" sx={{ py: 6 }}>
-                <Typography variant="h4" sx={{ fontWeight: 900, mb: 4 }}>
-                    Loading ...
-                </Typography>
-            </Container>
+            <GlobalLoading />
         );
     }
     return (
         <Container maxWidth="md" sx={{ py: 6 }}>
+            
+
             <Typography variant="h4" sx={{ fontWeight: 900, mb: 4 }}>
                 Manage Profile
             </Typography>
-
             {/* SECTION 1: PROFILE INFORMATION */}
             <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, borderRadius: 4, border: '1px solid', borderColor: 'divider', mb: 5 }}>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
@@ -272,7 +302,7 @@ export default function ProfileManagement() {
                                                 Edit
                                             </Button>
 
-                                            <Button variant="outlined" size="small" color="error" endIcon={<DeleteIcon />} onClick={()=>{handleDeleteGig(gig.id)}} >
+                                            <Button variant="outlined" size="small" color="error" endIcon={<DeleteIcon />} onClick={() => { handleDeleteGig(gig.id) }} >
                                                 Delete
                                             </Button>
                                         </Stack>
@@ -291,7 +321,7 @@ export default function ProfileManagement() {
                         disabled={isLimitReached}
                         startIcon={<AddIcon />}
                         sx={{
-                            py: 2,
+                            py: 1,
                             width: "fit-content",
                             alignSelf: "center",
                             borderStyle: 'dashed',
