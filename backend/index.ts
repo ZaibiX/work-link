@@ -8,7 +8,7 @@ import passport from './src/config/passport.js';
 import cookieParser from 'cookie-parser';
 
 const corsOptions = {
-  origin:["http://192.168.0.107:3000", "http://localhost:3000"],
+  origin:["http://192.168.0.108:3000", "http://localhost:3000"],
   credentials: true,// This allows the server to accept cookies from the frontend
 }
 

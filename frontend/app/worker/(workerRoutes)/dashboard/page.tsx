@@ -15,9 +15,9 @@ import Link from "next/link";
 import axiosInstance from "@/lib/utils/axiosInstance"
 import useAuth from "@/lib/store/authStore";
 import { useRouter } from "next/navigation";
-import { useAuthRedirect } from "@/lib/hooks/useAuthRedirect"
-// import BackdropLoading from "@/components/backdropLoading/BackdropLoading";
-import GlobalLoading from "@/components/loading/Loading";
+// import { useAuthRedirect } from "@/lib/hooks/useAuthRedirect"
+import BackdropLoading from "@/components/backdropLoading/BackdropLoading";
+// import GlobalLoading from "@/components/loading/Loading";
 
 const MOCK_WORKER = {
     id: "worker-123",
@@ -75,7 +75,7 @@ export default function ProfileManagement() {
 
     // const isLimitReached = gigs.length >= 3;
     const isLimitReached = false;
-    useAuthRedirect(authLoading, user, ["WORKER"]);
+    // useAuthRedirect(authLoading, user, ["WORKER"]);
 
     async function handleDeleteGig(gigId: string) {
         try {
@@ -159,14 +159,10 @@ export default function ProfileManagement() {
         fetchProfileDetails();
     }, [])
 
-    if(authLoading || !user){
-        return (
-            <GlobalLoading />
-        );
-    }
+    
     return (
         <Container maxWidth="md" sx={{ py: 6 }}>
-            
+            <BackdropLoading open={profile.id? false: true} />
 
             <Typography variant="h4" sx={{ fontWeight: 900, mb: 4 }}>
                 Manage Profile
