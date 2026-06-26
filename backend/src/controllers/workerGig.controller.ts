@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../utils/prisma.js";
 import { UserRole } from "../../generated/prisma/enums.js";
 import { SkillCategory } from "../../generated/prisma/enums.js";
+import { toScreamingSnake, fromScreamingSnake } from "../utils/screamingSnakeCase.js";
 
 // ---------------------------------------------------------------------------
 // Extend Express Request to include the authenticated user
@@ -75,10 +76,14 @@ export async function getWorkerGigById(req: Request, res: Response) {
         description:true,
       }
     });
+    if (gig) {
+      gig.city = fromScreamingSnake(gig.city);
+    }
 
     if (!gig) {
       return res.status(404).json({ success: false, message: "Gig not found" });
     }
+    
 
     return res.status(200).json({ success: true, data: gig });
   } catch (error) {
@@ -103,6 +108,7 @@ export async function createWorkerGig(req: Request, res: Response) {
     const { title, description, price, category, city, area, lat, lng , customSkill} = req.body;
     // const workerId: string = String(req.params.workerId);
     // const workerId= "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
+    const ssCity:string = toScreamingSnake(city);
     const authReq = req as AuthenticatedRequest;
 
     const userId = authReq.user?.id;
@@ -149,7 +155,7 @@ const gig = await prisma.gig.create({
     description,
     price: Number(price),
     category,
-    city,
+    city: ssCity,
     area,
     lat,
     lng,
@@ -182,6 +188,7 @@ export async function updateWorkerGig(req: Request, res: Response) {
     }
 
     const { title, description, price, category, city, area, lat, lng, isActive, customSkill } = req.body;
+    const ssCity:string = toScreamingSnake(city);
 
     // 2. Fix Issue 2: Check ownership via relation check 'worker: { userId }' using updateMany 
     // to prevent Prisma from throwing an unhandled exception if the gig doesn't match the user.
@@ -198,7 +205,7 @@ export async function updateWorkerGig(req: Request, res: Response) {
         ...(description !== undefined && { description }),
         ...(price !== undefined && { price: Number(price) }),
         ...(category !== undefined && { category }),
-        ...(city !== undefined && { city }),
+        ...(city !== undefined && { city: ssCity }),
         ...(area !== undefined && { area }),
         ...(lat !== undefined && { lat: Number(lat) }),
         ...(lng !== undefined && { lng: Number(lng) }),

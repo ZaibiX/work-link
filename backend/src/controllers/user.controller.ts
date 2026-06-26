@@ -89,7 +89,10 @@ import {SkillCategory } from "../../generated/prisma/enums.js";
       })
     ]);
 
-    res.json({gigs, totalGigs });
+    console.log("where condition: ", whereCondition, skip, limit, orderByCondition);
+    console.log("total gigs: ", totalGigs);
+
+    res.status(200).json({gigs, totalGigs });
   } catch (error) {
     console.error("Search Error:", error);
     res.status(500).json({ error: "Search failed" });

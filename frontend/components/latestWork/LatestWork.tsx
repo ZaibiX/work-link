@@ -196,7 +196,9 @@ export default function LatestOpportunities(){
           city:"LAHORE",
           sortBy:"recent",
         }
-      })
+      });
+
+      console.log("data from latest work: ", response.data)
 
       setGigs(response.data.gigs);
       const {totalGigs} = response.data
