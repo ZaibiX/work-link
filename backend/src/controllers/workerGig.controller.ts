@@ -121,21 +121,42 @@ export async function createWorkerGig(req: Request, res: Response) {
 
     // }
 
-    const gig = await prisma.gig.create({
-      data: {
-        title,
-        description,
-        price: Number(price),
-        category,
-        city,
-        area,
-        lat,
-        lng,
-        customSkill,
-        // Prisma uses this ID to fill the 'workerId' column in the Gig table
-        worker: { connect: { userId:  userId} },
-      },
-    });
+    // 1. Fetch the worker profile using the userId to find their worker ID and count their existing gigs
+const worker = await prisma.workerProfile.findUnique({
+  where: { userId: userId },
+  include: {
+    _count: {
+      select: { gigs: true } // Efficiently counts related gigs without loading all data
+    }
+  }
+});
+
+if (!worker) {
+  return res.status(404).json({ message: "Worker profile not found." });
+}
+
+// 2. Enforce the strict maximum limit of 3 gigs
+if (worker._count.gigs >= 3) {
+  return res.status(400).json({ 
+    message: "Maximum gig limit reached. You can only create up to 3 gigs." 
+  });
+}
+
+// 3. If validation passes, safely create the new gig
+const gig = await prisma.gig.create({
+  data: {
+    title,
+    description,
+    price: Number(price),
+    category,
+    city,
+    area,
+    lat,
+    lng,
+    customSkill,
+    worker: { connect: { id: worker.id } }, // Using the verified worker ID
+  },
+});
 
     return res.status(201).json({ success: true, message: "Gig created successfully", gig: gig });
   } catch (error: any) {

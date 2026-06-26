@@ -247,7 +247,7 @@ export default function ProfileManagement() {
                     </Grid>
                 </Grid>
 
-                <Box sx={{ mt: 4, p: 2, bgcolor: 'grey.50', borderRadius: 2, border: '1px dashed', borderColor: 'divider' }}>
+                <Box sx={{ mt: 4, p: 2, bgcolor: 'paper', borderRadius: 2, border: '1px dashed', borderColor: 'divider' }}>
                     <Stack direction="row" spacing={1} alignItems="center">
                         <MailOutlineIcon fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary">

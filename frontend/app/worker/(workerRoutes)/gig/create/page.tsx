@@ -11,6 +11,7 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import axiosInstance from "@/lib/utils/axiosInstance";
+import BackdropLoading from "@/components/backdropLoading/BackdropLoading";
 
 const SKILL_CATEGORIES = ["AC_TECHNICIAN", "ELECTRICIAN", "PLUMBER", "SOLAR_EXPERT", "PAINTER", "CARPENTER", "OTHER"];
 
@@ -19,7 +20,7 @@ export default function CreateGig() {
   const router = useRouter();
   // const workerId = params.workerId;
   const sampleId = "38a18bfb-a95a-4e16-ac1c-1ace0cc4babb";
-  
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -66,18 +67,24 @@ export default function CreateGig() {
       console.log("Validation passed. Submitting Gig for:", formData);
 
       try{
+        setLoading(true);
         const response = await axiosInstance.post(`/worker/gig`, formData);
+        setLoading(false);
       router.push('/worker/dashboard');
 
 
       }catch(err : any){
         console.error(err.response?.data?.message|| err)
       }
+      finally{ 
+        setLoading(false);
+       }
     }
   };
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
+      <BackdropLoading open={loading} />
       <Button 
         component={Link} 
         href={"/worker/dashboard/" } 

@@ -56,11 +56,11 @@ export default function CreateGig() {
     // setLoading(true);
     if (gigId) {
       fetchGig();
-    }else {
-    // If there is no gigId available or router is initializing, 
-    // decide if you want to keep loading or drop it.
-    setLoading(false);
-  }
+    } else {
+      // If there is no gigId available or router is initializing, 
+      // decide if you want to keep loading or drop it.
+      setLoading(false);
+    }
     // setLoading(false); race condition
   }, [gigId]);
 
@@ -100,13 +100,21 @@ export default function CreateGig() {
       // console.log("Validation passed. Submitting Gig for:", workerId, formData);
       // console.log("saving changes")
       try {
+        setLoading(true);
+
         const response = await axiosInstance.put(`worker/gig/${gigId}`, formData);
         setFormData(response.data.data)
+        setLoading(false);
+
+        router.push('/worker/dashboard');
 
       } catch (err: any) {
         console.log("error is: ", err)
         console.error(err.response?.data?.message || err.message)
 
+      }
+      finally {
+        setLoading(false);
       }
       // router.push('/worker/dashboard');
     }
